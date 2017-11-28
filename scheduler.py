@@ -11,12 +11,13 @@ def _ms2hours(ms):
 
 
 class Scheduler(object):
-    def __init__(self, order_file, vehicle_file, cost_prob):
-        self._orders = self._init_order_tasks_from_json(order_file, cost_prob)
+    def __init__(self, order_file, vehicle_file, cost_prob, opt):
+        self._orders = self._init_order_tasks_from_json(order_file, cost_prob, opt=opt)
         self._vehicles = self._init_vehicles_from_json(vehicle_file, cost_prob)
+        # TODO: remove unreachable orders according to vehicle information
 
     @staticmethod
-    def _init_order_tasks_from_json(filename, cost_prob):
+    def _init_order_tasks_from_json(filename, cost_prob, opt):
         assert filename
         assert isinstance(cost_prob, cost.CostMatrix)
         with open(filename) as f:
@@ -27,6 +28,8 @@ class Scheduler(object):
                 expected_start_time = _ms2hours(record["orderedPickupTime"])
                 prob = cost_prob.prob(from_loc, to_loc, expected_start_time)
                 is_virtual = False if "isVirtual" not in record else record["isVirtual"]
+                if is_virtual and prob < opt.prob_th:  # ignore small probability predicted orders
+                    continue
                 name = record["orderId"]
                 receivable = record["orderMoney"]
                 load_time, unload_time = record["loadingTime"], record["unLoadingTime"]
@@ -35,6 +38,8 @@ class Scheduler(object):
                 orders.append(task.OrderTask(from_loc, to_loc, expected_start_time, occur_prob=prob,
                                              is_virtual=is_virtual, name=name, receivable=receivable,
                                              load_time=load_time, unload_time=unload_time))
+        print("%d virtual (predicted) orders in total %d orders are ignored due to probability < %.1f%%."
+              % (len(json_obj["data"]) - len(orders), len(json_obj["data"]), opt.prob_th * 100))
         return orders
 
     @staticmethod
