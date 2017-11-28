@@ -41,22 +41,22 @@ class Scheduler(object):
         assert orig_len >= reduced_len
         print("Ignore %d virtual (predicted) orders in total %d orders due to probability < %.1f%%."
               % (orig_len - reduced_len, orig_len, opt.prob_th * 100))
+        if not vehicles:
+            return large_prob_orders
         # ignore unreachable orders
         reachable_orders = list()
-        if vehicles:
-            orig_len = reduced_len
-            for order in large_prob_orders:
-                for vehicle in vehicles:
-                    if vehicle.is_reachable(order, cost_prob):
-                        reachable_orders.append(order)
-                    else:
-                        if not order.is_virtual:
-                            print("Warning: ignore an unreachable real order %s!" % order.name)
-                        continue
-            reduced_len = len(reachable_orders)
-            print("Ignore %d unreachable orders in total %d large probability orders."
-                  % (orig_len - reduced_len, orig_len))
-            print("%d reachable large probability orders to be scheduled." % reduced_len)
+        orig_len = reduced_len
+        for order in large_prob_orders:
+            for vehicle in vehicles:
+                if vehicle.is_reachable(order, cost_prob):
+                    reachable_orders.append(order)
+                else:
+                    if not order.is_virtual:
+                        print("Warning: ignore an unreachable real order %s!" % order.name)
+                    continue
+        reduced_len = len(reachable_orders)
+        print("Ignore %d unreachable orders in total %d large probability orders." % (orig_len - reduced_len, orig_len))
+        print("%d reachable large probability orders to be scheduled." % reduced_len)
         return reachable_orders
 
     @staticmethod
