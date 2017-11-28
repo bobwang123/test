@@ -10,6 +10,14 @@ class Cost(object):
         self._expense = expense  # yuan
         self._duration = duration  # hour
 
+    @property
+    def expense(self):
+        return self._expense
+
+    @property
+    def duration(self):
+        return self._duration
+
 
 class CostMatrix(object):
     def __init__(self, cost_file, probability_file=None):
@@ -33,6 +41,7 @@ class CostMatrix(object):
                 for j in city_idx_values:
                     dists = distance[i][j]
                     if not dists:
+                        cost_mat[i][j] = {" ": Cost()} if i == j else None
                         continue
                     assert isinstance(dists, dict)
                     costs = dict()
@@ -68,3 +77,6 @@ class CostMatrix(object):
     def prob(self, start_loc, end_loc, time_in_hour):
         assert time_in_hour >= 0
         return self._prob_mat[start_loc][end_loc][int(time_in_hour % self._num_prob_ticks)]
+
+    def costs(self, start_loc, end_loc):
+        return self._cost_mat[start_loc][end_loc]

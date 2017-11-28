@@ -1,4 +1,5 @@
 
+import cost
 import math
 
 
@@ -19,6 +20,26 @@ class Task(object):
         self._is_virtual = is_virtual  # true iff this is a predicted order
         self._name = name
 
+    @property
+    def name(self):
+        return str(self._name)
+
+    @property
+    def loc_from(self):
+        return self._location[0]
+
+    @property
+    def loc_to(self):
+        return self._location[1]
+
+    @property
+    def expected_start_time(self):
+        return self._expected_start_time
+
+    @property
+    def is_virtual(self):
+        return self._is_virtual
+
 
 class OrderTask(Task):
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
@@ -27,6 +48,10 @@ class OrderTask(Task):
         self._receivable = receivable  # yuan
         self._load_time = load_time  # hour
         self._unload_time = unload_time  # hour
+
+    @property
+    def load_time(self):
+        return self._load_time
 
 
 class EmtpyRunTask(Task):
@@ -44,3 +69,15 @@ class Vehicle(object):
         self._avl_time = avl_time  # hours
         self._orders = list()
         self._num_orders_limit = num_orders_limit
+
+    def is_reachable(self, order, cost_prob_mat):
+        assert isinstance(order, OrderTask)
+        assert isinstance(cost_prob_mat, cost.CostMatrix)
+        min_empty_run_duration = order.expected_start_time - order.load_time - self._avl_time
+        if min_empty_run_duration <= 0:
+            return False
+        costs = cost_prob_mat.costs(self._avl_loc, order.loc_from)
+        for c in costs.values():  # check out every possible routes in between
+            if c.duration < min_empty_run_duration:
+                return True
+        return False
