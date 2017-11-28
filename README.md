@@ -1,2 +1,2 @@
-# heptax
-heptax
+# HeptaX
+HeptaX Logistics Scheduling Program
