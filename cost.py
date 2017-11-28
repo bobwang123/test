@@ -61,3 +61,10 @@ class CostMatrix(object):
                 assert 0.0 <= px <= 1.0
                 prob_mat[from_loc_idx][to_loc_idx][hour] = px
         return tuple([tuple([tuple(to_data) for to_data in from_data]) for from_data in prob_mat])
+
+    def city_idx(self, city_name):
+        return self._city_indices[city_name] if city_name in self._city_indices else None
+
+    def prob(self, start_loc, end_loc, time_in_hour):
+        assert time_in_hour >= 0
+        return self._prob_mat[start_loc][end_loc][int(time_in_hour % self._num_prob_ticks)]
