@@ -14,6 +14,12 @@ class Route(object):
     def name(self):
         return self._name
 
+    @property
+    def expense(self):
+        if self._cost:
+            return self._cost.expense
+        return 0.0
+
 
 class Task(object):
     def __init__(self, loc_start, loc_end, start_time, occur_prob, is_virtual, name):
@@ -48,6 +54,9 @@ class Task(object):
         assert isinstance(route, Route)
         self._routes[route.name] = route
 
+    def profit(self):
+        return {k: -r.expense for k, r in self._routes}
+
 
 class OrderTask(Task):
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
@@ -60,6 +69,9 @@ class OrderTask(Task):
     @property
     def load_time(self):
         return self._load_time
+
+    def profit(self):
+        return {k: self._receivable - r.expense for k, r in self._routes}
 
 
 class EmtpyRunTask(Task):
