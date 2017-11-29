@@ -12,4 +12,5 @@ if __name__ == "__main__":
     (cmd_opt, args) = option_parser.parse_args()
     cost_prob_mat = cost.CostMatrix("cost.json", "probability.http_api.json")
     schlr = scheduler.Scheduler("orders.http_api.json", "vehicles.http_api.json", cost_prob_mat, cmd_opt)
+    schlr.expand_orders(cost_prob_mat)
     print("Finished scheduling.")

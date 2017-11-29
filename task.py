@@ -10,13 +10,17 @@ class Route(object):
         self._cost = cost_ref
         self._next_tasks = list()  # list of Task object references
 
+    @property
+    def name(self):
+        return self._name
+
 
 class Task(object):
     def __init__(self, loc_start, loc_end, start_time, occur_prob, is_virtual, name):
         self._location = (loc_start, loc_end)
         self._expected_start_time = start_time  # hours since 00:00:00 on 1970/1/1
         self._occur_prob = occur_prob  # occurrence probability
-        self._routes = dict()  # dict of route_name:route_obj
+        self._routes = dict()  # Route.name:Route()
         self._is_virtual = is_virtual  # true iff this is a predicted order
         self._name = name
 
@@ -39,6 +43,10 @@ class Task(object):
     @property
     def is_virtual(self):
         return self._is_virtual
+
+    def add_route(self, route):
+        assert isinstance(route, Route)
+        self._routes[route.name] = route
 
 
 class OrderTask(Task):
@@ -76,8 +84,9 @@ class Vehicle(object):
         min_empty_run_duration = order.expected_start_time - order.load_time - self._avl_time
         if min_empty_run_duration <= 0:
             return False
+        # check out every possible route duration between this vehicle and order
         costs = cost_prob_mat.costs(self._avl_loc, order.loc_from)
-        for c in costs.values():  # check out every possible routes in between
+        for c in costs.values():
             if c.duration < min_empty_run_duration:
                 return True
         return False

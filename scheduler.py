@@ -72,3 +72,15 @@ class Scheduler(object):
                 avl_time = _ms2hours(record["earliestAvailableTime"])
                 vehicles.append(task.Vehicle(name, avl_loc, avl_time))
         return vehicles
+
+    @staticmethod
+    def _expand_orders(orders, cost_prob):
+        assert isinstance(cost_prob, cost.CostMatrix)
+        for order in orders:
+            costs = cost_prob.costs(order.loc_from, order.loc_to)
+            for k, c in costs.items():
+                route = task.Route(task=order, name=k, cost_ref=c)
+                order.add_route(route)
+
+    def expand_orders(self, cost_prob):
+        Scheduler._expand_orders(self._orders, cost_prob)
