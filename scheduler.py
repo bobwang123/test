@@ -12,8 +12,12 @@ def _ms2hours(ms):
 
 class Scheduler(object):
     def __init__(self, order_file, vehicle_file, cost_prob, opt):
-        self._vehicles = Scheduler._init_vehicles_from_json(vehicle_file, cost_prob)
-        self._orders = Scheduler._init_order_tasks_from_json(order_file, cost_prob, self._vehicles, opt=opt)
+        vehicles = Scheduler._init_vehicles_from_json(vehicle_file, cost_prob)
+        vehicles.sort(key=lambda x: x.avl_time)
+        self._sorted_vehicles = vehicles
+        orders = Scheduler._init_order_tasks_from_json(order_file, cost_prob, self._sorted_vehicles, opt=opt)
+        orders.sort(key=lambda x: x.expected_start_time)
+        self._sorted_orders = orders
 
     @staticmethod
     def _init_order_tasks_from_json(filename, cost_prob, vehicles=None, opt=None):
@@ -83,4 +87,8 @@ class Scheduler(object):
                 order.add_route(route)
 
     def expand_orders(self, cost_prob):
-        Scheduler._expand_orders(self._orders, cost_prob)
+        Scheduler._expand_orders(self._sorted_orders, cost_prob)
+
+    def build_order_dag(self):
+        for order in self._sorted_orders:  # find next step
+            pass

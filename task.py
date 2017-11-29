@@ -5,10 +5,10 @@ import math
 
 class Route(object):
     def __init__(self, task, name=None, cost_ref=None):
-        self._task = task  # reference
+        self._task = task  # this route belongs to task
         self._name = name
         self._cost = cost_ref
-        self._next_tasks = list()  # list of Task object references
+        self._next_steps = list()
 
     @property
     def name(self):
@@ -82,13 +82,28 @@ class EmtpyRunTask(Task):
         self._waiting = waiting  # waiting time
 
 
+class Step(object):
+    def __init__(self, empty_run=None, order=None):
+        self._empty_run = EmtpyRunTask(0, 0, 0) if not empty_run else empty_run
+        self._order = OrderTask(0, 0, 0) if not order else order
+
+
+class Plan(object):
+    def __init__(self):
+        self._steps = list()
+
+
 class Vehicle(object):
-    def __init__(self, name, avl_loc=None, avl_time=0, num_orders_limit=math.inf):
+    def __init__(self, name, avl_loc=None, avl_time=0, plan_size_limit=math.inf):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
-        self._orders = list()
-        self._num_orders_limit = num_orders_limit
+        self._candidate_plans = Plan()
+        self._plan_size_limit = plan_size_limit
+
+    @property
+    def avl_time(self):
+        return self._avl_time
 
     def is_reachable(self, order, cost_prob_mat):
         assert isinstance(order, OrderTask)
