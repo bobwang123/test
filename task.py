@@ -96,7 +96,7 @@ class Task(object):
     def connect(self, task, cost_prob_mat, max_wait_time=math.inf):
         assert isinstance(task, Task)
         assert isinstance(cost_prob_mat, cost.CostMatrix)
-        if id(self) == id(task):  # disallow connecting to itself
+        if id(self) == id(task):  # avoid connecting to itself
             return False
         connected = False
         for route in self._routes:
