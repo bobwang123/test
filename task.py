@@ -27,7 +27,7 @@ class Route(object):
         self._cost = cost_obj
         self._expected_end_time = \
             self._this_task.expected_start_time + self._this_task.no_run_time + self._cost.duration
-        self._next_steps = set()  # next reachable steps for sorting in future
+        self._next_steps = list()  # next reachable steps for sorting in future
 
     @property
     def name(self):
@@ -48,7 +48,7 @@ class Route(object):
 
     def add_next_step(self, step):
         assert isinstance(step, Step)
-        self._next_steps.add(step)
+        self._next_steps.append(step)
 
 
 class Task(object):
