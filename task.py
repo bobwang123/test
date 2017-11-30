@@ -114,6 +114,7 @@ class Task(object):
                     EmtpyRunTask(loc_start=self.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
                                  occur_prob=task.prob, is_virtual=task.is_virtual, name=empty_run_name,
                                  wait_time=wait_time)
+                empty_run.add_route(Route(task=empty_run, name=k, cost_obj=c))
                 candidate_step = Step(empty_run=empty_run, order=task)
                 route.add_next_step(candidate_step)
                 connected = True
@@ -150,11 +151,17 @@ class EmtpyRunTask(Task):
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
         super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
+        self._routes = [None]  # EmptyRunTask has and only has one Route obj
         self._wait_time = wait_time
 
     @property
     def no_run_time(self):
         return self._wait_time
+
+    def add_route(self, route):
+        assert isinstance(route, Route)
+        # EmptyRunTask has and only has one Route obj
+        self._routes[0] = route
 
 
 class Step(object):
