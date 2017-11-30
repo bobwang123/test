@@ -56,7 +56,7 @@ class Task(object):
         self._location = (loc_start, loc_end)
         self._expected_start_time = start_time  # hours since 00:00:00 on 1970/1/1
         self._occur_prob = occur_prob  # occurrence probability
-        self._routes = dict()  # Route.name:Route()
+        self._routes = list()
         self._is_virtual = is_virtual  # true iff this is a predicted order
         self._name = name
 
@@ -91,13 +91,13 @@ class Task(object):
 
     def add_route(self, route):
         assert isinstance(route, Route)
-        self._routes[route.name] = route
+        self._routes.append(route)
 
     def connect(self, task, cost_prob_mat):
         assert isinstance(task, Task)
         assert isinstance(cost_prob_mat, cost.CostMatrix)
         connected = False
-        for route in self._routes.values():
+        for route in self._routes:
             max_empty_run_time = task.expected_start_time - route.expected_end_time
             if max_empty_run_time <= 0:
                 continue
@@ -120,7 +120,7 @@ class Task(object):
         return connected
 
     def profit(self):
-        return {k: -r.expense * self.prob for k, r in self._routes}
+        return [-r.expense * self.prob for r in self._routes]
 
 
 class OrderTask(Task):
@@ -140,7 +140,7 @@ class OrderTask(Task):
         return self._load_time + self._unload_time
 
     def profit(self):
-        return {k: (self._receivable - r.expense) * self.prob for k, r in self._routes}
+        return [(self._receivable - r.expense) * self.prob for r in self._routes]
 
 
 class EmtpyRunTask(Task):
