@@ -36,7 +36,7 @@ class CostMatrix(object):
             json_obj = json.load(f)
             cities = tuple(json_obj["data"]["cities"])
             city_indices = {name: i for i, name in enumerate(cities)}
-            cost_mat = [[None] * len(cities)] * len(cities)
+            cost_mat = [[None] * len(cities) for _ in range(len(cities))]
             distance = tuple([tuple(row) for row in json_obj["data"]["distances"]])
             expense = tuple([tuple(row) for row in json_obj["data"]["price"]])
             duration = tuple([tuple(row) for row in json_obj["data"]["duration"]])
