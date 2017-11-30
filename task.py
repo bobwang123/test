@@ -116,8 +116,9 @@ class Task(object):
                     EmtpyRunTask(loc_start=self.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
                                  occur_prob=task.prob, is_virtual=task.is_virtual, name=empty_run_name,
                                  wait_time=wait_time)
-                empty_run.add_route(Route(task=empty_run, name=k, cost_obj=c))
-                candidate_step = Step(empty_run=empty_run, order=task)
+                empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
+                empty_run.add_route(empty_run_route)
+                candidate_step = Step(empty_run_route=empty_run_route, order_route=route)
                 route.add_next_step(candidate_step)
                 connected = True
         return connected
@@ -167,9 +168,9 @@ class EmtpyRunTask(Task):
 
 
 class Step(object):
-    def __init__(self, empty_run=None, order=None):
-        self._empty_run = EmtpyRunTask(0, 0, 0) if not empty_run else empty_run
-        self._order = OrderTask(0, 0, 0) if not order else order
+    def __init__(self, empty_run_route=None, order_route=None):
+        self._empty_run_route = EmtpyRunTask(0, 0, 0) if not empty_run_route else empty_run_route
+        self._order_route = OrderTask(0, 0, 0) if not order_route else order_route
 
 
 class Plan(object):
