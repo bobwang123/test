@@ -58,20 +58,19 @@ class Scheduler(object):
         if not vehicles:
             return large_prob_orders
         # ignore unreachable orders
-        reachable_orders = list()
+        all_reachable_orders = list()
         orig_len = reduced_len
-        for order in large_prob_orders:
-            for vehicle in vehicles:
+        for vehicle in vehicles:
+            reachable_orders = list()
+            for order in large_prob_orders:
                 if vehicle.is_reachable(order, cost_prob):
                     reachable_orders.append(order)
-                else:
-                    if not order.is_virtual:
-                        print("Warning: ignore an unreachable real order %s!" % order.name)
-                    continue
-        reduced_len = len(reachable_orders)
+            vehicle.reachable_orders = reachable_orders
+            all_reachable_orders.extend(reachable_orders)
+        reduced_len = len(all_reachable_orders)
         print("Ignore %d unreachable orders in total %d large probability orders." % (orig_len - reduced_len, orig_len))
         print("%d reachable large probability orders to be scheduled." % reduced_len)
-        return reachable_orders
+        return all_reachable_orders
 
     @staticmethod
     def _init_vehicles_from_json(filename, cost_prob):

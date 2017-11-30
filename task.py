@@ -188,6 +188,7 @@ class Vehicle(object):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
+        self._reachable_orders = list()
         self._candidate_plans = Plan()
         self._plan_size_limit = plan_size_limit
 
@@ -197,3 +198,11 @@ class Vehicle(object):
 
     def is_reachable(self, order, cost_prob_mat):
         return _is_reachable(self._avl_time, self._avl_loc, order, cost_prob_mat)
+
+    @property
+    def reachable_orders(self):
+        return self._reachable_orders
+
+    @reachable_orders.setter
+    def reachable_orders(self, orders):
+        self._reachable_orders = orders
