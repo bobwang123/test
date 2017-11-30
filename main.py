@@ -8,6 +8,7 @@ import timeit
 
 
 def main(opt):
+    t1 = timeit.default_timer()
     cost_prob_mat = cost.CostMatrix("cost.json", "probability.http_api.json")
     sch = scheduler.Scheduler("orders.indent.json", "vehicles.http_api.json", cost_prob_mat, opt)
     sch.run()
@@ -17,7 +18,6 @@ def main(opt):
 
 
 if __name__ == "__main__":
-    t1 = timeit.default_timer()
     option_parser = optparse.OptionParser()
     assert isinstance(option_parser, optparse.OptionParser)
     option_parser.add_option("--max-wait-time", action="store", dest="max_wait_time", type="float",
