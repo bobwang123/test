@@ -2,6 +2,7 @@
 import cost
 import json
 import task
+import timeit
 
 
 def _ms2hours(ms):
@@ -12,12 +13,20 @@ def _ms2hours(ms):
 
 class Scheduler(object):
     def __init__(self, order_file, vehicle_file, cost_prob, opt):
+        assert isinstance(cost_prob, cost.CostMatrix)
+        t1 = timeit.default_timer()
         vehicles = Scheduler._init_vehicles_from_json(vehicle_file, cost_prob)
         vehicles.sort(key=lambda x: x.avl_time)
         self._sorted_vehicles = vehicles
+        t2 = timeit.default_timer()
+        print("CPU - Init sorted vehicles: %.2f seconds" % (t2 - t1))
+        t1 = timeit.default_timer()
         orders = Scheduler._init_order_tasks_from_json(order_file, cost_prob, self._sorted_vehicles, opt=opt)
         orders.sort(key=lambda x: x.expected_start_time)
         self._sorted_orders = orders
+        self._cost_prob = cost_prob
+        t2 = timeit.default_timer()
+        print("CPU - Init sorted orders: %.2f seconds" % (t2 - t1))
 
     @staticmethod
     def _init_order_tasks_from_json(filename, cost_prob, vehicles=None, opt=None):
@@ -77,18 +86,29 @@ class Scheduler(object):
                 vehicles.append(task.Vehicle(name, avl_loc, avl_time))
         return vehicles
 
-    @staticmethod
-    def _expand_orders(orders, cost_prob):
-        assert isinstance(cost_prob, cost.CostMatrix)
-        for order in orders:
-            costs = cost_prob.costs(order.loc_from, order.loc_to)
+    def _build_order_cost(self):
+        for order in self._sorted_orders:
+            costs = self._cost_prob.costs(order.loc_from, order.loc_to)
             for k, c in costs.items():
-                route = task.Route(task=order, name=k, cost_ref=c)
+                route = task.Route(task=order, name=k, cost_obj=c)
                 order.add_route(route)
 
-    def expand_orders(self, cost_prob):
-        Scheduler._expand_orders(self._sorted_orders, cost_prob)
+    def _build_order_dag(self):
+        sorted_orders = self._sorted_orders
+        num_edges = 0
+        for i, order in enumerate(sorted_orders):
+            for next_i in range(i+1, len(sorted_orders)):
+                next_candidate = sorted_orders[next_i]
+                if order.connect(next_candidate, self._cost_prob):
+                    num_edges += 1
+        print("Create %d edges for order DAG." % num_edges)
 
-    def build_order_dag(self):
-        for order in self._sorted_orders:  # find next step
-            pass
+    def analyze_orders(self):
+        t1 = timeit.default_timer()
+        self._build_order_cost()
+        t2 = timeit.default_timer()
+        print("CPU - Build order cost sorted vehicles: %.2f seconds" % (t2 - t1))
+        t1 = timeit.default_timer()
+        self._build_order_dag()
+        t2 = timeit.default_timer()
+        print("CPU - Build order DAG sorted vehicles: %.2f seconds" % (t2 - t1))

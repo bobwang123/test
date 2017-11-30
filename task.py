@@ -3,12 +3,31 @@ import cost
 import math
 
 
+def _is_reachable(avl_time, avl_loc, task, cost_prob_mat):
+    """ Giving available time and location, check out if it is an reachable task according to the cost matrix. """
+    assert isinstance(task, Task)
+    assert isinstance(cost_prob_mat, cost.CostMatrix)
+    max_empty_run_time = task.expected_start_time - avl_time
+    if max_empty_run_time <= 0:
+        return False
+    # check out every possible route duration between current location and task
+    costs = cost_prob_mat.costs(avl_loc, task.loc_from)
+    for c in costs.values():
+        if c.duration < max_empty_run_time:
+            return True
+    return False
+
+
 class Route(object):
-    def __init__(self, task, name=None, cost_ref=None):
-        self._task = task  # this route belongs to task
+    def __init__(self, task, name=None, cost_obj=None):
+        assert isinstance(task, Task)
+        assert isinstance(cost_obj, cost.Cost)
+        self._this_task = task  # this route belongs to task
         self._name = name
-        self._cost = cost_ref
-        self._next_steps = list()
+        self._cost = cost_obj
+        self._expected_end_time = \
+            self._this_task.expected_start_time + self._this_task.no_run_time + self._cost.duration
+        self._next_steps = set()  # next reachable steps for sorting in future
 
     @property
     def name(self):
@@ -19,6 +38,17 @@ class Route(object):
         if self._cost:
             return self._cost.expense
         return 0.0
+
+    @property
+    def expected_end_time(self):
+        return self._expected_end_time
+
+    def is_reachable(self, task, cost_prob_mat):
+        return _is_reachable(self._expected_end_time, self._this_task.loc_to, task, cost_prob_mat)
+
+    def add_next_step(self, step):
+        assert isinstance(step, Step)
+        self._next_steps.add(step)
 
 
 class Task(object):
@@ -47,6 +77,15 @@ class Task(object):
         return self._expected_start_time
 
     @property
+    def prob(self):
+        return self._occur_prob
+
+    @property
+    def no_run_time(self):
+        """ a task may have no run time when it's waiting, loading or unloading """
+        return 0
+
+    @property
     def is_virtual(self):
         return self._is_virtual
 
@@ -54,8 +93,34 @@ class Task(object):
         assert isinstance(route, Route)
         self._routes[route.name] = route
 
+    def connect(self, task, cost_prob_mat):
+        assert isinstance(task, Task)
+        assert isinstance(cost_prob_mat, cost.CostMatrix)
+        connected = False
+        for route in self._routes.values():
+            max_empty_run_time = task.expected_start_time - route.expected_end_time
+            if max_empty_run_time <= 0:
+                continue
+            # check out every possible route duration between current location and task
+            costs = cost_prob_mat.costs(self.loc_to, task.loc_from)
+            for k, c in costs.items():
+                wait_time = max_empty_run_time - c.duration
+                if wait_time < 0:  # unreachable
+                    continue
+                # create an EmptyRunTask object if task is reachable via this route
+                empty_run_start_time = route.expected_end_time + wait_time
+                empty_run_name = EmtpyRunTask.NAME_PREFIX + k
+                empty_run = \
+                    EmtpyRunTask(loc_start=self.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
+                                 occur_prob=task.prob, is_virtual=task.is_virtual, name=empty_run_name,
+                                 wait_time=wait_time)
+                candidate_step = Step(empty_run=empty_run, order=task)
+                route.add_next_step(candidate_step)
+                connected = True
+        return connected
+
     def profit(self):
-        return {k: -r.expense for k, r in self._routes}
+        return {k: -r.expense * self.prob for k, r in self._routes}
 
 
 class OrderTask(Task):
@@ -70,16 +135,26 @@ class OrderTask(Task):
     def load_time(self):
         return self._load_time
 
+    @property
+    def no_run_time(self):
+        return self._load_time + self._unload_time
+
     def profit(self):
-        return {k: self._receivable - r.expense for k, r in self._routes}
+        return {k: (self._receivable - r.expense) * self.prob for k, r in self._routes}
 
 
 class EmtpyRunTask(Task):
-    """ Waiting time is always added before start_time. """
+    """ Waiting time is always added in front of start_time. """
+    NAME_PREFIX = '!'
+
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
         super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
         self._wait_time = wait_time
+
+    @property
+    def no_run_time(self):
+        return self._wait_time
 
 
 class Step(object):
@@ -89,8 +164,13 @@ class Step(object):
 
 
 class Plan(object):
+    """ A plan is composed of consecutive steps """
     def __init__(self):
         self._steps = list()
+
+    def append(self, step):
+        assert isinstance(step, Step)
+        self._steps.append(step)
 
 
 class Vehicle(object):
@@ -106,14 +186,4 @@ class Vehicle(object):
         return self._avl_time
 
     def is_reachable(self, order, cost_prob_mat):
-        assert isinstance(order, OrderTask)
-        assert isinstance(cost_prob_mat, cost.CostMatrix)
-        min_empty_run_duration = order.expected_start_time - order.load_time - self._avl_time
-        if min_empty_run_duration <= 0:
-            return False
-        # check out every possible route duration between this vehicle and order
-        costs = cost_prob_mat.costs(self._avl_loc, order.loc_from)
-        for c in costs.values():
-            if c.duration < min_empty_run_duration:
-                return True
-        return False
+        return _is_reachable(self._avl_time, self._avl_loc, order, cost_prob_mat)
