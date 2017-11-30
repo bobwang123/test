@@ -10,7 +10,7 @@ import timeit
 def main(opt):
     cost_prob_mat = cost.CostMatrix("cost.json", "probability.http_api.json")
     sch = scheduler.Scheduler("orders.indent.json", "vehicles.http_api.json", cost_prob_mat, opt)
-    sch.analyze_orders()
+    sch.run()
     print("Finished scheduling.")
     t2 = timeit.default_timer()
     print("CPU - Totals: %.2f seconds" % (t2 - t1))

@@ -105,7 +105,7 @@ class Scheduler(object):
                     num_edges += 1
         print("Create %d edges for order DAG." % num_edges)
 
-    def analyze_orders(self):
+    def _analyze_orders(self):
         t1 = timeit.default_timer()
         self._build_order_cost()
         t2 = timeit.default_timer()
@@ -114,3 +114,6 @@ class Scheduler(object):
         self._build_order_dag()
         t2 = timeit.default_timer()
         print("CPU - Build order DAG sorted vehicles: %.2f seconds" % (t2 - t1))
+
+    def run(self):
+        self._analyze_orders()
