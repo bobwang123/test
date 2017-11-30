@@ -77,9 +77,9 @@ class OrderTask(Task):
 class EmtpyRunTask(Task):
     """ Waiting time is always added before start_time. """
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
-                 waiting=0.0):
+                 wait_time=0.0):
         super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
-        self._waiting = waiting  # waiting time
+        self._wait_time = wait_time
 
 
 class Step(object):
