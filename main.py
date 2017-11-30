@@ -20,6 +20,10 @@ if __name__ == "__main__":
     t1 = timeit.default_timer()
     option_parser = optparse.OptionParser()
     assert isinstance(option_parser, optparse.OptionParser)
+    option_parser.add_option("--max-wait-time", action="store", dest="max_wait_time", type="float",
+                             metavar="MAX_WAIT_TIME", default=72,
+                             help="waiting time between two consecutive orders cannot be longer than MAX_WAIT_TIME. "
+                                  "[default=%default]")
     option_parser.add_option("--prob-threshold", action="store", dest="prob_th", type="float",
                              metavar="PROB_TH", default=0.05,
                              help="predicted orders are removed if prob < PROB_TH. [default=%default]")

@@ -93,7 +93,7 @@ class Task(object):
         assert isinstance(route, Route)
         self._routes.append(route)
 
-    def connect(self, task, cost_prob_mat):
+    def connect(self, task, cost_prob_mat, max_wait_time=math.inf):
         assert isinstance(task, Task)
         assert isinstance(cost_prob_mat, cost.CostMatrix)
         connected = False
@@ -105,7 +105,7 @@ class Task(object):
             costs = cost_prob_mat.costs(self.loc_to, task.loc_from)
             for k, c in costs.items():
                 wait_time = max_empty_run_time - c.duration
-                if wait_time < 0:  # unreachable
+                if wait_time < 0 or wait_time > max_wait_time:  # unreachable or waiting too long
                     continue
                 # create an EmptyRunTask object if task is reachable via this route
                 empty_run_start_time = route.expected_end_time + wait_time
