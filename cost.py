@@ -1,5 +1,6 @@
 
 import json
+import timeit
 
 from scipy.stats import norm
 
@@ -21,9 +22,12 @@ class Cost(object):
 
 class CostMatrix(object):
     def __init__(self, cost_file, probability_file=None):
+        t1 = timeit.default_timer()
         self._cities, self._city_indices, self._cost_mat = CostMatrix._parse_cost_json_file(cost_file)
         self._num_prob_ticks = 24  # each hour each distribution per day
         self._prob_mat = self._parse_prob_json_file(probability_file)
+        t2 = timeit.default_timer()
+        print("CPU - Init cost matrix: %.2f seconds" % (t2 - t1))
 
     @staticmethod
     def _parse_cost_json_file(cost_file):
