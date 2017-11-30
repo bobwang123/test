@@ -96,6 +96,7 @@ class Scheduler(object):
     def _build_order_dag(self):
         sorted_orders = self._sorted_orders
         num_edges = 0
+        # TODO: outer loop can be parallel
         for i, order in enumerate(sorted_orders):
             for next_i in range(i+1, len(sorted_orders)):
                 next_candidate = sorted_orders[next_i]
