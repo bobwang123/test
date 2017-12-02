@@ -116,3 +116,8 @@ class Scheduler(object):
 
     def run(self):
         self._analyze_orders()
+        t1 = timeit.default_timer()
+        for vehicle in self._sorted_vehicles:
+            vehicle.compute_max_profit()
+        t2 = timeit.default_timer()
+        print("CPU - Compute max profit for all vehicles: %.2f seconds" % (t2 - t1))

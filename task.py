@@ -28,6 +28,8 @@ class Route(object):
         self._expected_end_time = \
             self._this_task.expected_start_time + self._this_task.no_run_time + self._cost.duration
         self._next_steps = list()  # next reachable steps for sorting in future
+        self._profit = None
+        self._max_profit = None
 
     @property
     def name(self):
@@ -38,6 +40,39 @@ class Route(object):
         if self._cost:
             return self._cost.expense
         return 0.0
+
+    @property
+    def profit(self):
+        if self._profit is None:
+            self._profit = self._this_task.receivable - self.expense
+        return self._profit
+
+    @property
+    def next_steps(self):
+        return self._next_steps
+
+    def update_max_profit(self):
+        if self._max_profit is not None:
+            return
+        if not self.next_steps:
+            self._max_profit = self.profit
+            return
+        for s in self.next_steps:
+            assert isinstance(s, Step)
+            if s.max_profit is None:
+                s.update_max_profit()
+        self.next_steps.sort(key=lambda ss: ss.max_profit, reverse=True)
+        max_profit_step = self.next_steps[0]
+        # max_profit_step = max(self.next_steps, key=lambda ss: ss.max_profit)
+        assert isinstance(max_profit_step, Step)
+        if max_profit_step.max_profit <= 0:
+            self._max_profit = self.profit
+        else:
+            self._max_profit = self.profit + max_profit_step.max_profit
+
+    @property
+    def max_profit(self):
+        return self._max_profit
 
     @property
     def expected_end_time(self):
@@ -81,8 +116,16 @@ class Task(object):
         return self._occur_prob
 
     @property
+    def routes(self):
+        return self._routes
+
+    @property
     def no_run_time(self):
         """ a task may have no run time when it's waiting, loading or unloading """
+        return 0
+
+    @property
+    def receivable(self):
         return 0
 
     @property
@@ -118,13 +161,10 @@ class Task(object):
                                  wait_time=wait_time)
                 empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
                 empty_run.add_route(empty_run_route)
-                candidate_step = Step(empty_run_route=empty_run_route, order_route=route)
+                candidate_step = Step(empty_run_route=empty_run_route, order_task=task)
                 route.add_next_step(candidate_step)
                 connected = True
         return connected
-
-    def profit(self):
-        return [-r.expense * self.prob for r in self._routes]
 
 
 class OrderTask(Task):
@@ -134,6 +174,7 @@ class OrderTask(Task):
         self._receivable = receivable  # yuan
         self._load_time = load_time  # hour
         self._unload_time = unload_time  # hour
+        self._max_profit_route = None
 
     @property
     def load_time(self):
@@ -143,8 +184,21 @@ class OrderTask(Task):
     def no_run_time(self):
         return self._load_time + self._unload_time
 
-    def profit(self):
-        return [(self._receivable - r.expense) * self.prob for r in self._routes]
+    @property
+    def receivable(self):
+        return self._receivable
+
+    def max_profit_route(self):
+        if self._max_profit_route is not None:
+            return self._max_profit_route
+        # calculate max profit recursively
+        assert self.routes
+        for route in self.routes:
+            route.update_max_profit()
+        self.routes.sort(key=lambda r: r.max_profit, reverse=True)
+        self._max_profit_route = self.routes[0]
+        # self._max_profit_route = max(self.routes, key=lambda r: r.max_profit)
+        return self._max_profit_route
 
 
 class EmtpyRunTask(Task):
@@ -168,9 +222,26 @@ class EmtpyRunTask(Task):
 
 
 class Step(object):
-    def __init__(self, empty_run_route=None, order_route=None):
-        self._empty_run_route = EmtpyRunTask(0, 0, 0) if not empty_run_route else empty_run_route
-        self._order_route = OrderTask(0, 0, 0) if not order_route else order_route
+    def __init__(self, empty_run_route, order_task):
+        assert isinstance(empty_run_route, Route)
+        assert isinstance(order_task, OrderTask)
+        self._empty_run_route = empty_run_route
+        self._order_task = order_task
+        self._max_profit = None  # the max sum of profit of this step and its possible consecutive steps
+
+    @property
+    def max_profit(self):
+        return self._max_profit
+
+    def update_max_profit(self):
+        if self._max_profit is not None:
+            return
+        order_route = self._order_task.max_profit_route()
+        assert isinstance(order_route, Route)
+        # update max profit recursively if not done yet
+        if order_route.max_profit is None:
+            order_route.update_max_profit()
+        self._max_profit = self._empty_run_route.profit + order_route.max_profit
 
 
 class Plan(object):
@@ -184,12 +255,13 @@ class Plan(object):
 
 
 class Vehicle(object):
-    def __init__(self, name, avl_loc=None, avl_time=0, plan_size_limit=math.inf):
+    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=1, plan_size_limit=math.inf):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
         self._reachable_orders = list()
         self._candidate_plans = Plan()
+        self._candidate_num_limit = candidate_num_limit
         self._plan_size_limit = plan_size_limit
 
     @property
@@ -206,3 +278,6 @@ class Vehicle(object):
     @reachable_orders.setter
     def reachable_orders(self, orders):
         self._reachable_orders = orders
+
+    def compute_max_profit(self):
+        self._reachable_orders.sort(key=lambda order: order.max_profit_route().max_profit, reverse=True)
