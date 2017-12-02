@@ -5,3 +5,4 @@ all: setup.py
 
 clean:
 	$(RM) *.c *.so
+	$(RM) -r build/ __pycache__/
