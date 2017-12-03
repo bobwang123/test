@@ -45,6 +45,8 @@ class Route(object):
     def profit(self):
         if self._profit is None:
             self._profit = self._this_task.receivable - self.expense
+            if self._this_task.is_virtual:
+                self._profit *= self._this_task.prob
         return self._profit
 
     @property
