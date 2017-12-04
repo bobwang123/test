@@ -3,21 +3,6 @@ import cost
 import math
 
 
-def _is_reachable(avl_time, avl_loc, task, cost_prob_mat):
-    """ Giving available time and location, check out if it is an reachable task according to the cost matrix. """
-    assert isinstance(task, Task)
-    assert isinstance(cost_prob_mat, cost.CostMatrix)
-    max_empty_run_time = task.expected_start_time - avl_time
-    if max_empty_run_time <= 0:
-        return False
-    # check out every possible route duration between current location and task
-    costs = cost_prob_mat.costs(avl_loc, task.loc_from)
-    for c in costs.values():
-        if c.duration < max_empty_run_time:
-            return True
-    return False
-
-
 class Route(object):
     def __init__(self, task, name=None, cost_obj=None):
         assert isinstance(task, Task)
@@ -105,9 +90,6 @@ class Route(object):
     @property
     def expected_end_time(self):
         return self._expected_end_time
-
-    def is_reachable(self, task, cost_prob_mat):
-        return _is_reachable(self._expected_end_time, self._this_task.loc_to, task, cost_prob_mat)
 
     def add_next_step(self, step):
         assert isinstance(step, Step)
