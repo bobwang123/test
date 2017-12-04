@@ -100,7 +100,7 @@ class Scheduler(object):
         for i, order in enumerate(sorted_orders):
             for next_i in range(i+1, len(sorted_orders)):
                 next_candidate = sorted_orders[next_i]
-                if order.connect(next_candidate, self._cost_prob, self._opt.max_wait_time):
+                if order.connect(next_candidate, self._cost_prob, self._opt.max_wait_time, self._opt.max_empty_dist):
                     num_edges += 1
         print("Create %d edges for order DAG." % num_edges)
 
