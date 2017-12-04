@@ -12,6 +12,10 @@ class Cost(object):
         self._duration = duration  # hour
 
     @property
+    def distance(self):
+        return self._distance
+
+    @property
     def expense(self):
         return self._expense
 

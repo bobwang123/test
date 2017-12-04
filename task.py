@@ -53,6 +53,32 @@ class Route(object):
     def next_steps(self):
         return self._next_steps
 
+    def connect(self, task, cost_prob_mat, max_wait_time=math.inf, max_empty_run_distance=math.inf):
+        max_empty_run_time = task.expected_start_time - self.expected_end_time
+        if max_empty_run_time <= 0:
+            return False
+        connected = False
+        # check out every possible route duration between current location and task
+        empty_run_costs = cost_prob_mat.costs(self._this_task.loc_to, task.loc_from)
+        for k, c in empty_run_costs.items():
+            wait_time = max_empty_run_time - c.duration
+            empty_run_distance = c.distance
+            if wait_time < 0 \
+                    or wait_time > max_wait_time \
+                    or empty_run_distance > max_empty_run_distance:
+                continue
+            # create an EmptyRunTask object if task can be connected via this route
+            empty_run_start_time = self.expected_end_time + wait_time
+            empty_run = \
+                EmtpyRunTask(loc_start=self._this_task.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
+                             occur_prob=task.prob, is_virtual=task.is_virtual, wait_time=wait_time)
+            empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
+            empty_run.add_route(empty_run_route)
+            candidate_step = Step(empty_run_route=empty_run_route, order_task=task)
+            self.add_next_step(candidate_step)
+            connected = True
+        return connected
+
     def update_max_profit(self):
         if self._max_profit is not None:
             return
@@ -138,34 +164,14 @@ class Task(object):
         assert isinstance(route, Route)
         self._routes.append(route)
 
-    def connect(self, task, cost_prob_mat, max_wait_time=math.inf):
+    def connect(self, task, cost_prob_mat, max_wait_time=math.inf, max_empty_run_distance=math.inf):
         assert isinstance(task, Task)
         assert isinstance(cost_prob_mat, cost.CostMatrix)
         if id(self) == id(task):  # avoid connecting to itself
             return False
         connected = False
         for route in self._routes:
-            max_empty_run_time = task.expected_start_time - route.expected_end_time
-            if max_empty_run_time <= 0:
-                continue
-            # check out every possible route duration between current location and task
-            costs = cost_prob_mat.costs(self.loc_to, task.loc_from)
-            for k, c in costs.items():
-                wait_time = max_empty_run_time - c.duration
-                if wait_time < 0 or wait_time > max_wait_time:  # unreachable or waiting too long
-                    continue
-                # create an EmptyRunTask object if task is reachable via this route
-                empty_run_start_time = route.expected_end_time + wait_time
-                empty_run_name = EmtpyRunTask.NAME_PREFIX + k
-                empty_run = \
-                    EmtpyRunTask(loc_start=self.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
-                                 occur_prob=task.prob, is_virtual=task.is_virtual, name=empty_run_name,
-                                 wait_time=wait_time)
-                empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
-                empty_run.add_route(empty_run_route)
-                candidate_step = Step(empty_run_route=empty_run_route, order_task=task)
-                route.add_next_step(candidate_step)
-                connected = True
+            connected = route.connect(task, cost_prob_mat, max_wait_time, max_empty_run_distance)
         return connected
 
 
@@ -257,12 +263,13 @@ class Plan(object):
 
 
 class Vehicle(object):
-    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=1, plan_size_limit=math.inf):
+    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=5, plan_size_limit=math.inf):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
         self._reachable_orders = list()
-        self._candidate_plans = Plan()
+        self._max_profit_order = None
+        self._candidate_plans_sorted = Plan()
         self._candidate_num_limit = candidate_num_limit
         self._plan_size_limit = plan_size_limit
 
@@ -283,3 +290,9 @@ class Vehicle(object):
 
     def compute_max_profit(self):
         self._reachable_orders.sort(key=lambda order: order.max_profit_route().max_profit, reverse=True)
+
+    def _first_step(self):
+        pass
+
+    def candidate_plans(self, cost_prob_mat):
+        pass
