@@ -267,32 +267,25 @@ class Vehicle(object):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
-        self._reachable_orders = list()
-        self._max_profit_order = None
         self._candidate_plans_sorted = Plan()
         self._candidate_num_limit = candidate_num_limit
         self._plan_size_limit = plan_size_limit
+        # record all possible plans with a virtual route, a self-loop route
+        self._start_route = Route(
+            task=Task(loc_start=self._avl_loc, loc_end=self._avl_loc, start_time=self._avl_time, occur_prob=1.0,
+                      is_virtual=1, name="Vehicle_"+self._name),
+            name=None,
+            cost_obj=cost.Cost())
 
     @property
     def avl_time(self):
         return self._avl_time
 
-    def is_reachable(self, order, cost_prob_mat):
-        return _is_reachable(self._avl_time, self._avl_loc, order, cost_prob_mat)
-
-    @property
-    def reachable_orders(self):
-        return self._reachable_orders
-
-    @reachable_orders.setter
-    def reachable_orders(self, orders):
-        self._reachable_orders = orders
+    def connect(self, task, cost_prob_mat, max_wait_time=math.inf, max_empty_run_distance=math.inf):
+        return self._start_route.connect(task, cost_prob_mat, max_wait_time, max_empty_run_distance)
 
     def compute_max_profit(self):
-        self._reachable_orders.sort(key=lambda order: order.max_profit_route().max_profit, reverse=True)
-
-    def _first_step(self):
-        pass
+        self._start_route.update_max_profit()
 
     def candidate_plans(self, cost_prob_mat):
         pass
