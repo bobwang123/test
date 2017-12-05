@@ -135,7 +135,7 @@ class Task(object):
 
     @property
     def name(self):
-        return str(self._name)
+        return self._name
 
     @property
     def loc_from(self):
