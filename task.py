@@ -84,7 +84,7 @@ class Route(object):
         if max_profit_step.max_profit <= 0:
             self._max_profit = self.profit
         else:
-            self._max_profit = self.profit + max_profit_step.max_profit
+            self._max_profit = self.profit + self._this_task.prob * max_profit_step.max_profit
 
     @property
     def max_profit(self):
