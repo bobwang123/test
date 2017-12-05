@@ -338,7 +338,7 @@ class Plan(object):
 
 
 class Vehicle(object):
-    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=5):
+    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=10):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
