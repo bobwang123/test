@@ -1,6 +1,9 @@
 
 import cost
+import functools
 import math
+
+from datetime import datetime
 
 
 class Route(object):
@@ -91,9 +94,34 @@ class Route(object):
     def expected_end_time(self):
         return self._expected_end_time
 
+    @property
+    def is_terminal(self):
+        if self.max_profit is None:
+            return None
+        return not self.next_steps or self.next_steps[0].max_profit <= 0
+
     def add_next_step(self, step):
         assert isinstance(step, Step)
         self._next_steps.append(step)
+
+    def to_dict(self, cost_prob_mat):
+        route_dict = {
+            "orderId": self._this_task.name,
+            "orderMoney": self._this_task.receivable,
+            "fromCity": cost_prob_mat.city_name(self._this_task.loc_from),
+            "toCity": cost_prob_mat.city_name(self._this_task.loc_to),
+            "orderedPickupTime": str(datetime.fromtimestamp(self._this_task.expected_start_time * 3600)),
+            "loadingTime": self._this_task.load_time,
+            "unLoadingTime": self._this_task.unload_time,
+            "isVirtual": self._this_task.is_virtual,
+            "routeKey": self._name,
+            "distance": self._cost.distance,
+            "duration": self._cost.duration,
+            "expense": self._cost.expense,
+            "probability": self._this_task.prob,
+            "waitingTime": self._this_task.wait_time
+        }
+        return route_dict
 
 
 class Task(object):
@@ -130,12 +158,24 @@ class Task(object):
         return self._routes
 
     @property
+    def load_time(self):
+        return 0
+
+    @property
+    def unload_time(self):
+        return 0
+
+    @property
     def no_run_time(self):
         """ a task may have no run time when it's waiting, loading or unloading """
         return 0
 
     @property
     def receivable(self):
+        return 0
+
+    @property
+    def wait_time(self):
         return 0
 
     @property
@@ -171,8 +211,12 @@ class OrderTask(Task):
         return self._load_time
 
     @property
+    def unload_time(self):
+        return self._unload_time
+
+    @property
     def no_run_time(self):
-        return self._load_time + self._unload_time
+        return self.load_time + self.unload_time
 
     @property
     def receivable(self):
@@ -193,8 +237,6 @@ class OrderTask(Task):
 
 class EmtpyRunTask(Task):
     """ Waiting time is always added in front of start_time. """
-    NAME_PREFIX = '!'
-
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
         super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
@@ -203,6 +245,10 @@ class EmtpyRunTask(Task):
 
     @property
     def no_run_time(self):
+        return self._wait_time
+
+    @property
+    def wait_time(self):
         return self._wait_time
 
     def add_route(self, route):
@@ -220,6 +266,14 @@ class Step(object):
         self._max_profit = None  # the max sum of profit of this step and its possible consecutive steps
 
     @property
+    def prob(self):
+        return self._order_task.prob
+
+    @property
+    def profit(self):
+        return self._empty_run_route.profit + self._order_task.max_profit_route().profit
+
+    @property
     def max_profit(self):
         return self._max_profit
 
@@ -233,6 +287,18 @@ class Step(object):
             order_route.update_max_profit()
         self._max_profit = self._empty_run_route.profit + order_route.max_profit
 
+    def next_max_profit_step(self):
+        if self.is_terminal:
+            return None
+        return self._order_task.max_profit_route().next_steps[0]
+
+    @property
+    def is_terminal(self):
+        return self._order_task.max_profit_route().is_terminal
+
+    def to_dict(self, cost_prob_mat):
+        return self._empty_run_route.to_dict(cost_prob_mat), self._order_task.max_profit_route().to_dict(cost_prob_mat)
+
 
 class Plan(object):
     """ A plan is composed of consecutive steps """
@@ -243,15 +309,41 @@ class Plan(object):
         assert isinstance(step, Step)
         self._steps.append(step)
 
+    @property
+    def expected_profit(self):
+        if not self._steps:
+            return None
+        return self._steps[0].max_profit
+
+    def profit(self):
+        if not self._steps:
+            return None
+        return sum([s.profit/s.prob for s in self._steps])
+
+    def prob(self):
+        if not self._steps:
+            return None
+        return functools.reduce(lambda x, y: x * y, [s.prob for s in self._steps])
+
+    def to_dict(self, cost_prob_mat):
+        steps = [s.to_dict(cost_prob_mat) for s in self._steps]
+        steps = [r for s in steps for r in s]
+        plan_dict = {
+            "expectedProfit": self.expected_profit,
+            "profit": self.profit(),
+            "probability": self.prob(),
+            "routes": steps
+        }
+        return plan_dict
+
 
 class Vehicle(object):
-    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=5, plan_size_limit=math.inf):
+    def __init__(self, name, avl_loc=None, avl_time=0, candidate_num_limit=5):
         self._name = name
         self._avl_loc = avl_loc
         self._avl_time = avl_time  # hours
-        self._candidate_plans_sorted = Plan()
+        self._candidate_plans_sorted = list()
         self._candidate_num_limit = candidate_num_limit
-        self._plan_size_limit = plan_size_limit
         # record all possible plans with a virtual route, a self-loop route
         self._start_route = Route(
             task=Task(loc_start=self._avl_loc, loc_end=self._avl_loc, start_time=self._avl_time, occur_prob=1.0,
@@ -269,5 +361,22 @@ class Vehicle(object):
     def compute_max_profit(self):
         self._start_route.update_max_profit()
 
-    def candidate_plans(self, cost_prob_mat):
-        pass
+    def sorted_candidate_plans(self):
+        print("Output top %d plans with the greatest profit." % self._candidate_num_limit)
+        next_level1_steps = self._start_route.next_steps
+        for step1 in next_level1_steps[:self._candidate_num_limit]:
+            candidate_plan = Plan()
+            step = step1
+            candidate_plan.append(step)
+            while not step.is_terminal:
+                step = step.next_max_profit_step()
+                candidate_plan.append(step)
+            self._candidate_plans_sorted.append(candidate_plan)
+        return self._candidate_plans_sorted
+
+    def plans_to_dict(self, cost_prob_mat):
+        plans = list()
+        for p in self.sorted_candidate_plans():
+            plans.append(p.to_dict(cost_prob_mat))
+        vehicle_plans = {"vehicleNo": self._name, "plans": plans}
+        return vehicle_plans
