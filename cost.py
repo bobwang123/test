@@ -37,7 +37,7 @@ class CostMatrix(object):
     def _parse_cost_json_file(cost_file):
         assert cost_file
         with open(cost_file) as f:
-            json_obj = json.load(f)
+            json_obj = json.load(f, encoding="utf-8")
             cities = tuple(json_obj["data"]["cities"])
             city_indices = {name: i for i, name in enumerate(cities)}
             cost_mat = [[None] * len(cities) for _ in range(len(cities))]
@@ -64,7 +64,7 @@ class CostMatrix(object):
         if not prob_file:
             return prob_mat
         with open(prob_file) as f:
-            json_obj = json.load(f)
+            json_obj = json.load(f, encoding="utf-8")
             for norm_dist in json_obj["data"]:
                 from_loc_idx = self._city_indices[norm_dist["fromCity"]]
                 to_loc_idx = self._city_indices[norm_dist["toCity"]]
@@ -79,8 +79,11 @@ class CostMatrix(object):
                 prob_mat[from_loc_idx][to_loc_idx][hour] = px
         return tuple([tuple([tuple(to_data) for to_data in from_data]) for from_data in prob_mat])
 
-    def city_idx(self, city_name):
-        return self._city_indices[city_name] if city_name in self._city_indices else None
+    def city_idx(self, name):
+        return self._city_indices[name] if name in self._city_indices else None
+
+    def city_name(self, idx):
+        return self._cities[idx] if 0 <= idx < len(self._cities) else None
 
     def prob(self, start_loc, end_loc, time_in_hour):
         assert time_in_hour >= 0
