@@ -9,8 +9,8 @@ import timeit
 
 def main(opt):
     t1 = timeit.default_timer()
-    cost_prob_mat = cost.CostMatrix("cost.json", "probability.http_api.json")
-    sch = scheduler.Scheduler("orders.indent.json", "vehicles.http_api.json", cost_prob_mat, opt)
+    cost_prob_mat = cost.CostMatrix("cost.http_api.json", "probability.http_api.json")
+    sch = scheduler.Scheduler("orders.http_api.json", "vehicles.http_api.json", cost_prob_mat, opt)
     sch.run()
     print("Finished scheduling.")
     t2 = timeit.default_timer()
