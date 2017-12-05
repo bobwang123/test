@@ -118,13 +118,14 @@ class Scheduler(object):
             vehicle.compute_max_profit()
         t2 = timeit.default_timer()
         print("CPU - Compute max profit for all vehicles: %.2f seconds" % (t2 - t1))
+
+    def dump_plans(self, output_file):
         t1 = timeit.default_timer()
         all_plans = list()
         for vehicle in self._sorted_vehicles:
             all_plans.append(vehicle.plans_to_dict(self._cost_prob))
         all_plans = {"data": all_plans}
-        with open("output_plans.json", "w") as f:
+        with open(output_file, "w") as f:
             f.write(json.dumps(all_plans, ensure_ascii=False, indent=4))
         t2 = timeit.default_timer()
         print("CPU - Create and dump plans: %.2f seconds" % (t2 - t1))
-
