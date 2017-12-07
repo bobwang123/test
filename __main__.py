@@ -106,6 +106,10 @@ if __name__ == "__main__":
     option_parser.add_option("-m", "--profile", action="store_true", dest="profile",
                              default=False,
                              help="profiles this program. [default=%default]")
+    option_parser.add_option("-d", "--debug", action="store_true", dest="debug",
+                             default=False,
+                             help="turn debug mode to dump more information. [default=%default]")
+
     (cmd_opt, args) = option_parser.parse_args()
     profile_outfile = "prof.out"
     if cmd_opt.profile:

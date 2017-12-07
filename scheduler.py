@@ -93,12 +93,23 @@ class Scheduler(object):
     def _build_order_dag(self):
         sorted_orders = self._sorted_orders
         num_edges = 0
+        adj_mat = list(list())
+        if self._opt.debug:
+            adj_mat = [[0] * len(sorted_orders) for _ in range(len(sorted_orders))]
         # TODO: outer loop can be parallel
         for i, order in enumerate(sorted_orders):
             for next_i in range(i+1, len(sorted_orders)):
                 next_candidate = sorted_orders[next_i]
                 if order.connect(next_candidate, self._cost_prob, self._opt.max_wait_time, self._opt.max_empty_dist):
                     num_edges += 1
+                    if self._opt.debug:
+                        adj_mat[i][next_i] = 1
+        if self._opt.debug:
+            with open("adjacency_matrix.txt", "w") as f:
+                s = ""
+                for line in adj_mat:
+                    s += ",".join([str(c) for c in line]) + "\n"
+                f.write(s)
         print("Create %d edges for order DAG." % num_edges)
 
     def _analyze_orders(self):
