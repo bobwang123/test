@@ -56,7 +56,7 @@ def _upload_plans(api, filename):
     if err:
         print("** Curl uploading error: %s" % err)
     t2 = timeit.default_timer()
-    print("CPU - Upload plans: %.2f seconds" % (t2 - t1))
+    print("Wall - Upload plans: %.2f seconds" % (t2 - t1))
 
 
 def main(opt):
@@ -69,7 +69,7 @@ def main(opt):
     sch.dump_plans(CACHE_FILE["output_plans_file"])
     _upload_plans(opt.plan_upload_api, CACHE_FILE["output_plans_file"])
     t2 = timeit.default_timer()
-    print("CPU - Totals: %.2f seconds" % (t2 - t1))
+    print("Wall - Totals: %.2f seconds" % (t2 - t1))
 
 
 if __name__ == "__main__":
