@@ -31,7 +31,7 @@ class CostMatrix(object):
         self._num_prob_ticks = 24  # each hour each distribution per day
         self._prob_mat = self._parse_prob_json_file(probability_file)
         t2 = timeit.default_timer()
-        print("CPU - Init cost matrix: %.2f seconds" % (t2 - t1))
+        print("Wall - Init cost matrix: %.2f seconds" % (t2 - t1))
 
     @staticmethod
     def _parse_cost_json_file(cost_file):
