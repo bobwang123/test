@@ -48,7 +48,7 @@ def _upload_plans(api, filename):
     t1 = timeit.default_timer()
     upload_process = subprocess.Popen(
         ["curl", "--output", "curl.log", "--include", "--silent", "--show-error",
-         "--header", "Content-Type: application/json;charset=utf8",
+         "--header", "Content-Type: text/plain;charset=utf8",
          "--data", "@%s" % filename,
          api],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
