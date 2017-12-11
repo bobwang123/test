@@ -62,7 +62,7 @@ class Scheduler(object):
         all_reachable_orders = set()
         for vehicle in vehicles:
             for order in large_prob_orders:
-                if vehicle.connect(order, cost_prob, opt.max_wait_time, opt.max_empty_dist):
+                if vehicle.connect(order, cost_prob):
                     all_reachable_orders.add(order)
         reduced_len = len(all_reachable_orders)
         print("Ignore %d unreachable orders in total %d large probability orders." % (orig_len - reduced_len, orig_len))
