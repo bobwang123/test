@@ -39,8 +39,8 @@ class Scheduler(object):
             for record in json_obj["data"]:
                 from_loc, to_loc = cost_prob.city_idx(record["fromCity"]), cost_prob.city_idx(record["toCity"])
                 expected_start_time = _ms2hours(record["orderedPickupTime"])
-                prob = cost_prob.prob(from_loc, to_loc, expected_start_time)
                 is_virtual = False if "isVirtual" not in record else record["isVirtual"]
+                prob = cost_prob.prob(from_loc, to_loc, expected_start_time) if is_virtual else 1.0
                 if is_virtual and prob < opt.prob_th:  # ignore small probability predicted orders
                     continue
                 name = record["orderId"]
