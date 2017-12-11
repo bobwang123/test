@@ -48,7 +48,7 @@ var server = http.createServer(function (request, response) {
     // "curl http://139.198.5.125/OwnLogistics/api/own/conf?mark=test0927 -o conf.json; "
     var cmd =
 	"export rundir=" + uniq_rundir + "; OUTDIR=$rundir; mkdir -p $OUTDIR; cd $OUTDIR; "
-	+ "/usr/bin/time python ../.. "
+	+ "/usr/bin/time python -O ../.. "
 	+ "--cost='http://139.198.5.125/OwnLogistics/api/own/city/cost" + "' "
 	+ "--order-occur-prob='http://139.198.5.125/OwnLogistics/api/own/city/statistics?mark=" + params["simulateCode"] + "' "
 	+ "--order-file='http://139.198.5.125/OwnLogistics/api/own/orders?mark=" + params["simulateCode"] + "' "
