@@ -66,8 +66,10 @@ class CostMatrix(object):
         with open(prob_file) as f:
             json_obj = json.load(f, encoding="utf-8")
             for norm_dist in json_obj["data"]:
-                from_loc_idx = self._city_indices[norm_dist["fromCity"]]
-                to_loc_idx = self._city_indices[norm_dist["toCity"]]
+                from_loc_idx = self.city_idx(norm_dist["fromCity"])
+                to_loc_idx = self.city_idx(norm_dist["toCity"])
+                if from_loc_idx is None or to_loc_idx is None:
+                    continue
                 hour = int(norm_dist["timeHour"])
                 assert 0 <= hour <= self._num_prob_ticks - 1
                 mean = norm_dist["avgCount"]
