@@ -33,6 +33,7 @@ class Scheduler(object):
     def _init_order_tasks_from_json(filename, cost_prob, vehicles=None, opt=None):
         assert filename
         assert isinstance(cost_prob, cost.CostMatrix)
+        has_real = False
         with open(filename) as f:
             json_obj = json.load(f)
             large_prob_orders = list()
@@ -40,6 +41,7 @@ class Scheduler(object):
                 from_loc, to_loc = cost_prob.city_idx(record["fromCity"]), cost_prob.city_idx(record["toCity"])
                 expected_start_time = _ms2hours(record["orderedPickupTime"])
                 is_virtual = False if "isVirtual" not in record else record["isVirtual"]
+                has_real = not is_virtual
                 prob = cost_prob.prob(from_loc, to_loc, expected_start_time) if is_virtual else 1.0
                 if is_virtual and prob < opt.prob_th:  # ignore small probability predicted orders
                     continue
@@ -51,6 +53,8 @@ class Scheduler(object):
                 large_prob_orders.append(task.OrderTask(from_loc, to_loc, expected_start_time, occur_prob=prob,
                                                         is_virtual=is_virtual, name=name, receivable=receivable,
                                                         load_time=load_time, unload_time=unload_time))
+        if not has_real:
+            print("** Warning: No real orders found! There are only virtual orders.")
         orig_len, reduced_len = len(json_obj["data"]), len(large_prob_orders)
         assert orig_len >= reduced_len
         print("Ignore %d virtual (predicted) orders in total %d orders due to probability < %.1f%%."
