@@ -45,7 +45,7 @@ def _download_data(opt):
 
 def _upload_plans(api, filename):
     if not api.startswith("http://"):
-        print("** No plan is uploaded because API is invalid.")
+        print("** Warning: No plan is uploaded because API is invalid.")
         return
     t1 = timeit.default_timer()
     upload_process = subprocess.Popen(
