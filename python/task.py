@@ -274,6 +274,10 @@ class Step(object):
         return self._empty_run_route.profit + self._order_task.max_profit_route().profit
 
     @property
+    def is_virtual(self):
+        return self._order_task.is_virtual
+
+    @property
     def max_profit(self):
         return self._max_profit
 
@@ -364,7 +368,12 @@ class Vehicle(object):
     def sorted_candidate_plans(self):
         print("Output top %d plans with the greatest profit." % self._candidate_num_limit)
         next_level1_steps = self._start_route.next_steps
-        for step1 in next_level1_steps[:self._candidate_num_limit]:
+        c = 0
+        for step1 in next_level1_steps:
+            if step1.is_virtual:
+                continue
+            if c >= self._candidate_num_limit:
+                break
             candidate_plan = Plan()
             step = step1
             candidate_plan.append(step)
@@ -372,6 +381,7 @@ class Vehicle(object):
                 step = step.next_max_profit_step()
                 candidate_plan.append(step)
             self._candidate_plans_sorted.append(candidate_plan)
+            c += 1
         return self._candidate_plans_sorted
 
     def plans_to_dict(self, cost_prob_mat):
