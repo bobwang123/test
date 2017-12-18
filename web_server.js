@@ -74,7 +74,7 @@ var server = http.createServer(function (request, response) {
         + "--order-file='http://139.198.5.125/OwnLogistics/api/own/orders?mark=" + mark + "' "
         + "--vehicle-file='http://139.198.5.125/OwnLogistics/api/own/vehicles?mark=" + mark + "' "
         + "--plan-upload-api='http://139.198.5.125/OwnLogistics/api/own/routes/result?mark=" + mark + "' "
-        + "> stdout.log; echo RUNDIR=$rundir ";
+        + "> stdout.log; echo RUNDIR:$rundir ";
     console.log(cmd);
     var workerProcess = child_process.exec(cmd,
         function (error, stdout, stderr) {
