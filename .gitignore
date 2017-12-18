@@ -102,3 +102,6 @@ ENV/
 
 # PyCharm
 .idea/
+
+# Javacript
+node_modules/
