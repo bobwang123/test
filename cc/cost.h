@@ -30,7 +30,7 @@ class CostMatrix
   const Cost **_prob_mat;
   static const int _num_prob_ticks = 24;  // each hour each distribution per day
 public:
-  CostMatrix();
+  explicit CostMatrix(const char *filename);
   ~CostMatrix();
 };
 
