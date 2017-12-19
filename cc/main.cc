@@ -2,6 +2,6 @@
 
 int main()
 {
-  CostMatrix cm("orders.http_api.json");
+  CostMatrix cm("cost.http_api.json");
   return 0;
 }
