@@ -6,6 +6,8 @@
 
 using namespace std;
 
+extern const int vsp_debug;
+
 vector<string> &
 CostMatrix::_create_cities(cJSON *json)
 {
@@ -15,10 +17,9 @@ CostMatrix::_create_cities(cJSON *json)
     cJSON *json_city_name = cJSON_GetArrayItem(json_array_cities, i);
     _cities.push_back(json_city_name->valuestring);
   }
-#ifdef DEBUG
-  for (int i = 0; i < _cities.size(); ++i)
-    cout << _cities[i] << endl;
-#endif  // DEBUG
+  if (vsp_debug)
+    for (int i = 0; i < _cities.size(); ++i)
+      cout << _cities[i] << endl;
   return _cities;
 }
 
@@ -40,24 +41,47 @@ CostMatrix::_create_city_indices(cJSON *json)
   }
   if (has_dup_cities)
     exit(EXIT_FAILURE);  // clean up things with atexit() if necessary
-#ifdef DEBUG
-  for (map<string, CityIdxType>::const_iterator it = _city_indices.begin();
-       it != _city_indices.end(); ++it)
-    cout << it->first << ',' << it->second << endl;
-#endif  // DEBUG
+  if (vsp_debug)
+    for (map<string, CityIdxType>::const_iterator it = _city_indices.begin();
+         it != _city_indices.end(); ++it)
+      cout << it->first << ',' << it->second << endl;
   return _city_indices;
 }
 
-const Cost **
+std::map<std::string, Cost *> **
 CostMatrix::_create_cost_mat(cJSON *json)
 {
-  return 0;
+  return _cost_mat;
 }
 
-const Cost **
+CostMatrix::_BaseProbArrayType **
 CostMatrix::_create_prob_mat(cJSON *json)
 {
-  return 0;
+  const size_t ndim = _cities.size();
+  _prob_mat = new _BaseProbArrayType *[ndim];
+  for (int i = 0; i < ndim; ++i)
+    _prob_mat[i] = new _BaseProbArrayType[ndim];
+  cJSON *json_3d = cJSON_GetObjectItem(json, "prob_matrix");
+  vsp_debug && cout << "[" << "\n";
+  for (int i = 0; i < cJSON_GetArraySize(json_3d); ++i)
+  {
+    vsp_debug && cout << "\t[" << "\n";
+    cJSON *json_2d = cJSON_GetArrayItem(json_3d, i);
+    for (int j = 0; j < cJSON_GetArraySize(json_2d); ++j)
+    {
+      vsp_debug && cout << "\t\t[";
+      cJSON *json_1d = cJSON_GetArrayItem(json_2d, j);
+      for (int k = 0; k < cJSON_GetArraySize(json_1d); ++k)
+      {
+        _prob_mat[i][j][k] = cJSON_GetArrayItem(json_1d, k)->valuedouble;
+        vsp_debug && cout << _prob_mat[i][j][k] << ", ";
+      }
+      vsp_debug && cout << "\t\t]," << "\n";
+    }
+    vsp_debug && cout << "\t]," << "\n";
+  }
+  vsp_debug && cout << "]" << "\n";
+  return _prob_mat;
 }
 
 int CostMatrix::_parse_cost_json(cJSON *json)
@@ -79,4 +103,9 @@ CostMatrix::CostMatrix(const char *filename)
 
 CostMatrix::~CostMatrix()
 {
+  const size_t ndim = _cities.size();
+  for (int i = 0; i < ndim; ++i)
+    delete[] _prob_mat[i];
+  delete[] _prob_mat;
+  _prob_mat = 0;
 }

@@ -27,6 +27,7 @@ class CostMatrix
 {
   // each hour each distribution per day
   static const std::size_t _NUM_PROB_TICKS = 24;
+  typedef double _BaseProbArrayType[_NUM_PROB_TICKS];
 public:
   typedef std::vector<std::string>::size_type CityIdxType;
 private:
@@ -37,15 +38,15 @@ private:
   // [from][to][route_name] -> Cost
   std::map<std::string, Cost *> **_cost_mat;
   // [from][to][hour_tick] -> double
-  const double ***_prob_mat;
+  _BaseProbArrayType **_prob_mat;
 public:
   explicit CostMatrix(const char *filename);
   ~CostMatrix();
 private:
   std::vector<std::string> &_create_cities(cJSON *json);
   std::map<std::string, CityIdxType> &_create_city_indices(cJSON *json);
-  const Cost **_create_cost_mat(cJSON *json);
-  const Cost **_create_prob_mat(cJSON *json);
+  std::map<std::string, Cost *> **_create_cost_mat(cJSON *json);
+  _BaseProbArrayType **_create_prob_mat(cJSON *json);
   int _parse_cost_json(cJSON *json);
 };
 
