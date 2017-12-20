@@ -4,6 +4,7 @@ var http = require('http');
 var url = require('url');
 var util = require('util');
 var fs = require("fs")
+var crypto = require("crypto");
 const child_process = require('child_process');
 
 var PORT = 8139
@@ -74,7 +75,7 @@ var server = http.createServer(function (request, response) {
         + "--order-file='http://139.198.5.125/OwnLogistics/api/own/orders?mark=" + mark + "' "
         + "--vehicle-file='http://139.198.5.125/OwnLogistics/api/own/vehicles?mark=" + mark + "' "
         + "--plan-upload-api='http://139.198.5.125/OwnLogistics/api/own/routes/result?mark=" + mark + "' ";
-    var uniq_rundir = "run_" + mark + "/" + Date.now() + "_" + Math.ceil(Math.random()*1e10) + "/";
+    var uniq_rundir = "run_" + mark + "/" + Date.now() + "_" + crypto.randomBytes(3).toString('hex') + "/";
     var cmd =
         "export rundir=" + uniq_rundir + "; OUTDIR=$rundir; mkdir -p $OUTDIR; cd $OUTDIR; "
         + "ln -sf ../../" + COST_CACHE_FILE + "; " + "ln -sf ../../" + PROB_CACHE_FILE + "; "
