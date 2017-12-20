@@ -113,6 +113,11 @@ CostMatrix::_create_prob_mat(cJSON *json)
     {
       vsp_debug && cout << "  [";
       cJSON *json_1d = cJSON_GetArrayItem(json_2d, j);
+      if (_NUM_PROB_TICKS == cJSON_GetArraySize(json_1d))
+      {
+        cerr << "** Error: hour ticks mismatch!" << endl;
+        exit(-1);
+      }
       for (int k = 0; k < cJSON_GetArraySize(json_1d); ++k)
       {
         _prob_mat[i][j][k] = cJSON_GetArrayItem(json_1d, k)->valuedouble;
