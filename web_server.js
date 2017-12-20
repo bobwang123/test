@@ -51,7 +51,8 @@ var server = http.createServer(function (request, response) {
         var curl_cfg = " --verbose "; // " --silent --show-error ";
         var cmd_cost = "echo curl-cost && /usr/bin/time curl" + curl_cfg + cost_api + " -o " + COST_CACHE_FILE;
         var cmd_prob = "echo curl-prob && /usr/bin/time curl" + curl_cfg + prob_api + " -o " + PROB_CACHE_FILE;
-        var cmd = cmd_cost + ";\n" + cmd_prob;
+        var cmd_cost_prob_cc = "/usr/bin/time python python/cost.py " + COST_CACHE_FILE + " " + PROB_CACHE_FILE;
+        var cmd = cmd_cost + ";\n" + cmd_prob + ";\n" + cmd_cost_prob_cc;
         console.log(cmd);
         var update_stdout = child_process.execSync(cmd);
         console.log('stdout: ' + update_stdout);
