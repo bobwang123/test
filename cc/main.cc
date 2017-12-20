@@ -8,6 +8,7 @@ extern const int vsp_debug = 0;
 
 int main()
 {
+  // Generate this file using "$ python python/cost.py cost.json prob.json"
   CostMatrix cm("cost_prob.cc.json");
   return 0;
 }
