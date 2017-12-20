@@ -23,6 +23,13 @@ class Cost(object):
     def duration(self):
         return self._duration
 
+    def to_dict(self):
+        return {
+            "distance": self._distance,
+            "expense":  self._expense,
+            "duration": self._duration
+        }
+
 
 class CostMatrix(object):
     def __init__(self, cost_file, probability_file=None):
@@ -93,3 +100,26 @@ class CostMatrix(object):
 
     def costs(self, start_loc, end_loc):
         return self._cost_mat[start_loc][end_loc]
+
+    def to_json(self, filename):
+        cost_mat_dict = [[{r: c.to_dict() for r, c in d2.items()} for d2 in d1] for d1 in self._cost_mat]
+        json_dict = {
+            "cities": self._cities,
+            "city_indices": self._city_indices,
+            "cost_matrix": cost_mat_dict,
+            "prob_matrix": self._prob_mat
+        }
+        with open(filename, "w") as f:
+            json.dump(json_dict, f, ensure_ascii=False, indent=4)
+
+
+if __name__ == "__main__":
+    import sys
+    cm = None
+    if len(sys.argv) == 1:
+        print("** Error: No cost file and probability file is given.")
+        exit(-1)
+    cf = sys.argv[1]
+    pf = sys.argv[2] if len(sys.argv) > 2 else None
+    cm = CostMatrix(cf, pf)
+    cm.to_json("cost_prob.cc.json")
