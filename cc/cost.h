@@ -1,6 +1,7 @@
 #ifndef __COST_H__
 #define __COST_H__
 
+#include "cJSON.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -24,14 +25,28 @@ public:
 
 class CostMatrix
 {
+  // each hour each distribution per day
+  static const std::size_t _NUM_PROB_TICKS = 24;
+public:
+  typedef std::vector<std::string>::size_type CityIdxType;
+private:
+  // [CityIdxType] -> city_name
   std::vector<std::string> _cities;
-  std::map<std::string, int> _city_indices;
-  const Cost **_cost_mat;
-  const Cost **_prob_mat;
-  static const int _num_prob_ticks = 24;  // each hour each distribution per day
+  // [city_name] -> CityIdxType
+  std::map<std::string, CityIdxType> _city_indices;
+  // [from][to][route_name] -> Cost
+  std::map<std::string, Cost *> **_cost_mat;
+  // [from][to][hour_tick] -> double
+  const double ***_prob_mat;
 public:
   explicit CostMatrix(const char *filename);
   ~CostMatrix();
+private:
+  std::vector<std::string> &_create_cities(cJSON *json);
+  std::map<std::string, CityIdxType> &_create_city_indices(cJSON *json);
+  const Cost **_create_cost_mat(cJSON *json);
+  const Cost **_create_prob_mat(cJSON *json);
+  int _parse_cost_json(cJSON *json);
 };
 
 #endif /* __COST_H__ */
