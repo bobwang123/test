@@ -1,5 +1,6 @@
 
 import json
+import numpy
 import timeit
 
 from scipy.stats import norm
@@ -67,7 +68,7 @@ class CostMatrix(object):
         return cities, city_indices, cost_mat
 
     def _parse_prob_json_file(self, prob_file, default_prob=1.0):
-        prob_mat = [[[default_prob] * self._num_prob_ticks]* len(self._city_indices)] * len(self._city_indices)
+        prob_mat = numpy.ones((len(self._city_indices), len(self._city_indices), self._num_prob_ticks))
         if not prob_file:
             return prob_mat
         with open(prob_file) as f:
