@@ -59,7 +59,7 @@ var server = http.createServer(function (request, response) {
         console.log(cmd);
         var update_stdout = child_process.execSync(cmd);
         console.log('stdout: ' + update_stdout);
-        console.log("- Finish updating cost and probability matrix.");
+        console.log("- Finish updating cost and probability matrix.\n");
         response.write("### Finish updating cost and probability matrix.\n");
         if (!mark) {
             response.write("### Not run because no simulateCode is specified.\n");
@@ -92,7 +92,7 @@ var server = http.createServer(function (request, response) {
             }
             console.log('stdout: ' + stdout);
             console.log('stderr: ' + stderr);
-            console.log("- Finish optimization.");
+            console.log("- Finish optimization.\n");
             response.write("### Finish optimization.\n");
             response.end();
         });
