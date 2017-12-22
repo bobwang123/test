@@ -55,7 +55,7 @@ var server = http.createServer(function (request, response) {
         var cmd_prob = "echo curl-prob && /usr/bin/time curl" + curl_cfg + prob_api + " -o " + PROB_CACHE_FILE;
         // cmd to create COST_PROB_CC_CACHE_FILE, i.e. cost_prob.cc.json
         var cmd_cost_prob_cc = "/usr/bin/time python python/cost.py " + COST_CACHE_FILE + " " + PROB_CACHE_FILE;
-        var cmd = cmd_cost + ";\n" + cmd_prob + ";\n" + cmd_cost_prob_cc;
+        var cmd = cmd_cost + ";\n" + cmd_prob + ";\n" + cmd_cost_prob_cc + "; true";
         console.log(cmd);
         var update_stdout = child_process.execSync(cmd);
         console.log('stdout: ' + update_stdout);
