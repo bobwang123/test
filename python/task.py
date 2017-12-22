@@ -351,7 +351,7 @@ class Vehicle(object):
         # record all possible plans with a virtual route, a self-loop route
         self._start_route = Route(
             task=Task(loc_start=self._avl_loc, loc_end=self._avl_loc, start_time=self._avl_time, occur_prob=1.0,
-                      is_virtual=1, name="Vehicle_"+self._name),
+                      is_virtual=1, name=self._name),
             name=None,
             cost_obj=cost.Cost())
 
