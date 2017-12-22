@@ -64,7 +64,7 @@ def main(opt):
     _download_data(opt)
     t1 = timeit.default_timer()
     cost_prob_mat = cost.CostMatrix(CACHE_FILE["cost_file"], CACHE_FILE["prob_file"])
-    sch = scheduler.Scheduler(CACHE_FILE["order_file"], CACHE_FILE["vehicle_file"], cost_prob_mat, opt)
+    sch = scheduler.Scheduler(CACHE_FILE["vehicle_file"], CACHE_FILE["order_file"], cost_prob_mat, opt)
     sch.run()
     print("Finished scheduling.")
     sch.dump_plans(CACHE_FILE["output_plans_file"])

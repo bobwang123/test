@@ -12,7 +12,7 @@ def _ms2hours(ms):
 
 
 class Scheduler(object):
-    def __init__(self, order_file, vehicle_file, cost_prob, opt):
+    def __init__(self, vehicle_file, order_file, cost_prob, opt):
         assert isinstance(cost_prob, cost.CostMatrix)
         self._opt = opt
         t1 = timeit.default_timer()
