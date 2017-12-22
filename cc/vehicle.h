@@ -5,7 +5,6 @@
 #include <string>
 
 class Route;
-class Cost;
 class Task;
 class Plan;
 
@@ -21,9 +20,12 @@ class Vehicle
   Task *_start_task;
   Route *_start_route;
 public:
-  Vehicle(const char *name, CostMatrix::CityIdxType avl_loc,
-          const double avl_time, const int candidate_num_limit);
+  Vehicle(const std::string &name,
+          CostMatrix::CityIdxType avl_loc,
+          const double avl_time = 0.0,
+          const int candidate_num_limit = 10);
   ~Vehicle();
 };
 
 #endif  // __VEHICLE_H__
+
