@@ -49,13 +49,13 @@ CostMatrix::_create_city_indices(cJSON *json)
   return _city_indices;
 }
 
-CostMatrix::_BaseCostMapType **
+CostMatrix::CostMapType **
 CostMatrix::_create_cost_mat(cJSON *json)
 {
   const size_t ndim = _cities.size();
-  _cost_mat = new _BaseCostMapType *[ndim];
+  _cost_mat = new CostMapType *[ndim];
   for (int i = 0; i < ndim; ++i)
-    _cost_mat[i] = new _BaseCostMapType[ndim];
+    _cost_mat[i] = new CostMapType[ndim];
   cJSON *json_2d = cJSON_GetObjectItem(json, "cost_matrix");
   assert(ndim == cJSON_GetArraySize(json_2d));
   vsp_debug && cout << "\nCost Matrix\n" << "[" << "\n";
@@ -161,3 +161,4 @@ CostMatrix::~CostMatrix()
   delete[] _prob_mat;
   _prob_mat = 0;
 }
+
