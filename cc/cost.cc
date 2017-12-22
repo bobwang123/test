@@ -113,7 +113,7 @@ CostMatrix::_create_prob_mat(cJSON *json)
     {
       vsp_debug && cout << "  [";
       cJSON *json_1d = cJSON_GetArrayItem(json_2d, j);
-      if (_NUM_PROB_TICKS == cJSON_GetArraySize(json_1d))
+      if (_NUM_PROB_TICKS != cJSON_GetArraySize(json_1d))
       {
         cerr << "** Error: hour ticks mismatch!" << endl;
         exit(-1);
@@ -145,7 +145,7 @@ CostMatrix::CostMatrix(const char *filename)
 {
   cJSON *json = parse_json_file(filename);
   _parse_cost_json(json);
-  cJSON_Delete(json);
+  cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
 }
 
 CostMatrix::~CostMatrix()
