@@ -15,8 +15,11 @@ class Task
   bool _is_virtual;
   const std::string _name;
 public:
-  Task(CostMatrix::CityIdxType loc_start,CostMatrix::CityIdxType loc_end,
-       double start_time, double occur_prob, bool is_virtual,
+  Task(CostMatrix::CityIdxType loc_start,
+       CostMatrix::CityIdxType loc_end,
+       double start_time,
+       double occur_prob,
+       bool is_virtual,
        const std::string &name);
   ~Task();
 public:
