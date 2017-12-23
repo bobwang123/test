@@ -1,0 +1,72 @@
+# This Makefile provides auto-dependency check
+#EXE  :=
+#SRCS :=
+
+# header file search paths
+#INC_DIRS := ..
+
+# source file search paths
+#SRC_DIRS := ..
+
+OBJS := $(subst .cc,.o,$(SRCS))
+DEPS := $(subst .cc,.d,$(SRCS))
+
+CC      := gcc
+CFLAGS  += -Wall
+LDFLAGS +=
+LIBS    += -lm
+
+PLATFORM:=$(shell uname -s)
+ifeq ($(PLATFORM),Darwin)
+    LDFLAGS += -Wl,-stack_size,0x1000000
+    CC := /usr/local/opt/llvm/bin/clang++
+endif
+# Set large stack size in *RUNTIME* on CentOS:
+# 	$ ulimit -s <stack_size>
+# For example,
+# 	$ ulimit -s 10240
+
+# check debug status
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+    CFLAGS += -DDEBUG -ggdb
+else
+    CFLAGS += -DNDEBUG -O3
+endif
+
+# set header file search paths
+CFLAGS   += $(addprefix -I,$(INC_DIRS))
+vpath %.h $(INC_DIRS)
+
+# set source file search paths
+vpath %.cc $(SRC_DIRS)
+
+.PHONY: all
+all: $(EXE) 
+	@echo "$(shell pwd)/$< build finished."
+	
+$(EXE): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+clean-cmd := $(RM) $(DEPS) $(OBJS)
+distclean-cmd := $(clean-cmd) $(EXE)
+.PHONY: clean distclean
+clean:
+	$(clean-cmd)
+
+distclean:
+	$(distclean-cmd)
+
+# No '\t' in front of sinclude!
+ifneq "$(MAKECMDGOALS)" "clean"
+    ifneq "$(MAKECMDGOALS)" "distclean"
+        sinclude $(DEPS)
+    endif
+endif
+
+%.d: %.cc
+	$(CC) -MM $(CFLAGS) $< \
+	    | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
+
+%.o: %.cc
+	$(CC) -o $@ $(CFLAGS) -c $<

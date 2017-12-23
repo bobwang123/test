@@ -58,7 +58,7 @@ class Route(object):
             # create an EmptyRunTask object if task can be connected via this route
             empty_run_start_time = self.expected_end_time + wait_time
             empty_run = \
-                EmtpyRunTask(loc_start=self._this_task.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
+                EmptyRunTask(loc_start=self._this_task.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
                              occur_prob=task.prob, is_virtual=task.is_virtual, wait_time=wait_time)
             empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
             empty_run.add_route(empty_run_route)
@@ -81,10 +81,9 @@ class Route(object):
         max_profit_step = self.next_steps[0]
         # max_profit_step = max(self.next_steps, key=lambda ss: ss.max_profit)
         assert isinstance(max_profit_step, Step)
-        if max_profit_step.max_profit <= 0:
-            self._max_profit = self.profit
-        else:
-            self._max_profit = self.profit + self._this_task.prob * max_profit_step.max_profit
+        self._max_profit = self.profit
+        if max_profit_step.max_profit > 0:
+            self._max_profit += self._this_task.prob * max_profit_step.max_profit
 
     @property
     def max_profit(self):
@@ -235,12 +234,11 @@ class OrderTask(Task):
         return self._max_profit_route
 
 
-class EmtpyRunTask(Task):
+class EmptyRunTask(Task):
     """ Waiting time is always added in front of start_time. """
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
-        super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
-        self._routes = [None]  # EmptyRunTask has and only has one Route obj
+        super(EmptyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
         self._wait_time = wait_time
 
     @property
@@ -250,11 +248,6 @@ class EmtpyRunTask(Task):
     @property
     def wait_time(self):
         return self._wait_time
-
-    def add_route(self, route):
-        assert isinstance(route, Route)
-        # EmptyRunTask has and only has one Route obj
-        self._routes[0] = route
 
 
 class Step(object):
@@ -351,7 +344,7 @@ class Vehicle(object):
         # record all possible plans with a virtual route, a self-loop route
         self._start_route = Route(
             task=Task(loc_start=self._avl_loc, loc_end=self._avl_loc, start_time=self._avl_time, occur_prob=1.0,
-                      is_virtual=1, name="Vehicle_"+self._name),
+                      is_virtual=1, name=self._name),
             name=None,
             cost_obj=cost.Cost())
 
@@ -365,7 +358,7 @@ class Vehicle(object):
     def compute_max_profit(self):
         self._start_route.update_max_profit()
 
-    def sorted_candidate_plans(self):
+    def _sorted_candidate_plans(self):
         print("Output top %d plans with the greatest profit." % self._candidate_num_limit)
         next_level1_steps = self._start_route.next_steps
         c = 0
@@ -386,7 +379,7 @@ class Vehicle(object):
 
     def plans_to_dict(self, cost_prob_mat):
         plans = list()
-        for p in self.sorted_candidate_plans():
+        for p in self._sorted_candidate_plans():
             plans.append(p.to_dict(cost_prob_mat))
         vehicle_plans = {"vehicleNo": self._name, "plans": plans}
         return vehicle_plans
