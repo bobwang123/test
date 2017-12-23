@@ -240,7 +240,6 @@ class EmptyRunTask(Task):
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
         super(EmptyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
-        self._routes = [None]  # EmptyRunTask has and only has one Route obj
         self._wait_time = wait_time
 
     @property
@@ -250,11 +249,6 @@ class EmptyRunTask(Task):
     @property
     def wait_time(self):
         return self._wait_time
-
-    def add_route(self, route):
-        assert isinstance(route, Route)
-        # EmptyRunTask has and only has one Route obj
-        self._routes[0] = route
 
 
 class Step(object):
