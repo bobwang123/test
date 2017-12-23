@@ -81,10 +81,9 @@ class Route(object):
         max_profit_step = self.next_steps[0]
         # max_profit_step = max(self.next_steps, key=lambda ss: ss.max_profit)
         assert isinstance(max_profit_step, Step)
-        if max_profit_step.max_profit <= 0:
-            self._max_profit = self.profit
-        else:
-            self._max_profit = self.profit + self._this_task.prob * max_profit_step.max_profit
+        self._max_profit = self.profit
+        if max_profit_step.max_profit > 0:
+            self._max_profit += self._this_task.prob * max_profit_step.max_profit
 
     @property
     def max_profit(self):
