@@ -22,16 +22,22 @@ public:
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();
 public:
-  inline const std::string &name() const { return _name; }
-  inline double expected_end_time() const { return _expected_end_time; }
-  inline std::vector<Step *> &next_steps() { return _next_steps; }
-  double expense() const;
+  const std::string &
+    name() const { return _name; }
+  double
+    expected_end_time() const { return _expected_end_time; }
+  std::vector<Step *> &
+    next_steps() { return _next_steps; }
+  double
+    expense() const;
 public:
-  double profit();
-  bool connect(Task &task,
-               const CostMatrix &cost_prob_mat,
-               const double max_wait_time,
-               const double max_empty_run_distance);
+  double
+    profit();
+  bool
+    connect(Task &task,
+            const CostMatrix &cost_prob_mat,
+            const double max_wait_time,
+            const double max_empty_run_distance);
 };
 
 #endif /* __ROUTE_H__ */
