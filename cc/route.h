@@ -1,13 +1,11 @@
 #ifndef __ROUTE_H__
 #define __ROUTE_H__
 
+#include "cost.h"
+#include "step.h"
+#include "consts.h"
 #include <vector>
 #include <string>
-
-class Cost;
-class CostMatrix;
-class Step;
-class Task;
 
 class Route
 {
@@ -18,26 +16,49 @@ class Route
   std::vector<Step *> _next_steps;  // all next reachable steps
   double _profit;  // profit of this route
   double _max_profit;  // max profit of all plans starting from this route
+  std::vector<EmptyRunTask *> _next_empty_task;  // for garbage collection
+  std::vector<Route *> _next_empty_route;  // for garbage collection
 public:
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();
+  static bool
+    reverse_cmp(const Route *ra, const Route *rb)
+    { return rb->max_profit() <= ra->max_profit(); }
 public:
   const std::string &
     name() const { return _name; }
-  double
+  const double
+    expense() const { return _cost.expense(); }
+  const double
     expected_end_time() const { return _expected_end_time; }
   std::vector<Step *> &
     next_steps() { return _next_steps; }
-  double
-    expense() const;
-public:
-  double
+  const double
     profit();
-  bool
-    connect(Task &task,
+  const bool
+    connect(OrderTask &task,
             const CostMatrix &cost_prob_mat,
-            const double max_wait_time,
-            const double max_empty_run_distance);
+            const double max_wait_time=Consts::DOUBLE_INF,
+            const double max_empty_run_distance=Consts::DOUBLE_INF);
+  void
+    update_max_profit();
+  const double
+    max_profit() const { return _max_profit; }
+  const bool
+    is_terminal() const
+    {
+      if (Consts::is_none(max_profit()))
+        return false;
+      if (_next_steps.empty())
+        return true;
+      if (_next_steps.at(0)->max_profit() <= 0)
+        return true;
+      return false;
+    }
+  void
+    add_next_step(Step *step) { _next_steps.push_back(step); }
+  cJSON *
+    to_dict(const CostMatrix &cost_prob_mat) const;
 };
 
 #endif /* __ROUTE_H__ */
