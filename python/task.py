@@ -58,7 +58,7 @@ class Route(object):
             # create an EmptyRunTask object if task can be connected via this route
             empty_run_start_time = self.expected_end_time + wait_time
             empty_run = \
-                EmtpyRunTask(loc_start=self._this_task.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
+                EmptyRunTask(loc_start=self._this_task.loc_to, loc_end=task.loc_from, start_time=empty_run_start_time,
                              occur_prob=task.prob, is_virtual=task.is_virtual, wait_time=wait_time)
             empty_run_route = Route(task=empty_run, name=k, cost_obj=c)
             empty_run.add_route(empty_run_route)
@@ -235,11 +235,11 @@ class OrderTask(Task):
         return self._max_profit_route
 
 
-class EmtpyRunTask(Task):
+class EmptyRunTask(Task):
     """ Waiting time is always added in front of start_time. """
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
                  wait_time=0.0):
-        super(EmtpyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
+        super(EmptyRunTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
         self._routes = [None]  # EmptyRunTask has and only has one Route obj
         self._wait_time = wait_time
 
