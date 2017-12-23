@@ -365,7 +365,7 @@ class Vehicle(object):
     def compute_max_profit(self):
         self._start_route.update_max_profit()
 
-    def sorted_candidate_plans(self):
+    def _sorted_candidate_plans(self):
         print("Output top %d plans with the greatest profit." % self._candidate_num_limit)
         next_level1_steps = self._start_route.next_steps
         c = 0
@@ -386,7 +386,7 @@ class Vehicle(object):
 
     def plans_to_dict(self, cost_prob_mat):
         plans = list()
-        for p in self.sorted_candidate_plans():
+        for p in self._sorted_candidate_plans():
             plans.append(p.to_dict(cost_prob_mat))
         vehicle_plans = {"vehicleNo": self._name, "plans": plans}
         return vehicle_plans
