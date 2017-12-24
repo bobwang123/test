@@ -25,6 +25,9 @@ public:
        const bool is_virtual,
        const std::string &name);
   virtual ~Task();
+  static bool
+    reverse_cmp(const Task *ta, const Task *tb)
+    { return !(ta->expected_start_time() < tb->expected_start_time()); }
 public:
   const std::string &
     name() const { return _name; }
@@ -77,9 +80,6 @@ public:
             const double load_time,
             const double unload_time);
     ~OrderTask();
-    static bool
-      reverse_cmp(const OrderTask *ta, const OrderTask *tb)
-      { return !(ta->expected_start_time() < tb->expected_start_time()); }
 public:
     const double
       load_time() const { return _load_time; }

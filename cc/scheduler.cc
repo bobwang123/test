@@ -151,7 +151,7 @@ Scheduler::_ignore_unreachable_orders_and_sort()
     << " reachable large probability orders to be scheduled." << endl;
   vector<OrderTask *> sorted_orders(all_reachable_orders.begin(),
                                     all_reachable_orders.end());
-  // sort(sorted_orders.begin(), sorted_orders.end(), OrderTask::reverse_cmp);
+  sort(sorted_orders.begin(), sorted_orders.end(), Task::reverse_cmp);
   // raw array should be faster than vector when randomly accessing
   _sorted_orders = new OrderTask *[_num_sorted_orders];
   for (vector<OrderTask *>::size_type i = 0; i < _num_sorted_orders; ++i)
