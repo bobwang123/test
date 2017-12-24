@@ -15,8 +15,8 @@ class Vehicle
   std::string _name;
   CostMatrix::CityIdxType _avl_loc;
   const double _avl_time;  // hours
-  std::vector<Plan *>_candidate_plans_sorted;
   const int _candidate_num_limit;
+  std::vector<Plan *>_candidate_plans_sorted;
   // a self-loop virtual task/route leading in all possible plans
   Cost *_start_cost;
   Task *_start_task;

@@ -5,6 +5,7 @@
 #include "step.h"
 #include "consts.h"
 #include <vector>
+#include <list>
 #include <string>
 
 class Route
@@ -16,8 +17,8 @@ class Route
   std::vector<Step *> _next_steps;  // all next reachable steps
   double _profit;  // profit of this route
   double _max_profit;  // max profit of all plans starting from this route
-  std::vector<EmptyRunTask *> _next_empty_task;  // for garbage collection
-  std::vector<Route *> _next_empty_route;  // for garbage collection
+  std::list<EmptyRunTask *> _next_empty_task;  // for garbage collection
+  std::list<Route *> _next_empty_route;  // for garbage collection
 public:
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();

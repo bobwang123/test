@@ -12,7 +12,9 @@ vector<string> &
 CostMatrix::_create_cities(cJSON *json)
 {
   cJSON *json_array_cities = cJSON_GetObjectItem(json, "cities");
-  for (int i = 0; i < cJSON_GetArraySize(json_array_cities); ++i)
+  const int num_cities = cJSON_GetArraySize(json_array_cities);
+  _cities.reserve(num_cities);
+  for (int i = 0; i < num_cities; ++i)
   {
     cJSON *json_city_name = cJSON_GetArrayItem(json_array_cities, i);
     _cities.push_back(json_city_name->valuestring);

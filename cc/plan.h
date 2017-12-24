@@ -26,8 +26,9 @@ class Plan
     }
     return step_arr;
   }
+  const std::size_t _NUM_RESERVED_STEPS
 public:
-  Plan() {}
+  Plan(): _steps(_NUM_RESERVED_STEPS) {}
   ~Plan() {}
 public:
   void
