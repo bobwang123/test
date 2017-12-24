@@ -41,7 +41,8 @@ class Scheduler(object):
                 from_loc, to_loc = cost_prob.city_idx(record["fromCity"]), cost_prob.city_idx(record["toCity"])
                 expected_start_time = _ms2hours(record["orderedPickupTime"])
                 is_virtual = False if "isVirtual" not in record else record["isVirtual"]
-                has_real = not is_virtual
+                if not is_virtual:  # found a real order
+                    has_real = True
                 prob = cost_prob.prob(from_loc, to_loc, expected_start_time) if is_virtual else 1.0
                 if is_virtual and prob < opt.prob_th:  # ignore small probability predicted orders
                     continue
