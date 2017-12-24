@@ -1,6 +1,7 @@
 #include "step.h"
 #include "route.h"
 #include "consts.h"
+#include <cassert>
 
 Step::Step(Route &empty_run_route, OrderTask &order_task)
   :_empty_run_route(empty_run_route), _order_task(order_task),
