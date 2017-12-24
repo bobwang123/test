@@ -35,6 +35,8 @@ private:
   void
     _ignore_unreachable_orders_and_sort();
   void
+    _build_order_cost();
+  void
     _build_order_dag();
   void
     _analyze_orders();
