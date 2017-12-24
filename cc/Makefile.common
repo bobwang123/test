@@ -11,7 +11,7 @@
 OBJS := $(subst .cc,.o,$(SRCS))
 DEPS := $(subst .cc,.d,$(SRCS))
 
-CC      := gcc
+CC      := g++
 CFLAGS  += -Wall
 LDFLAGS +=
 LIBS    += -lm
