@@ -27,7 +27,7 @@ namespace
 
 // ignore small probability predicted(virtual) orders
 const double
-Scheduler::_PROB_TH = 0.5;
+Scheduler::_PROB_TH = 0.05;
 
 const double
 Scheduler::_DEFAULT_LOAD_TIME = 5;
@@ -36,7 +36,7 @@ const double
 Scheduler::_DEFAULT_UNLOAD_TIME = 5;
 
 const double
-Scheduler::_DEFAULT_MAX_WAIT_TIME = 12;
+Scheduler::_DEFAULT_MAX_WAIT_TIME = 72;
 
 const double
 Scheduler::_DEFAULT_MAX_MAX_EMPTY_DIST = 500;
