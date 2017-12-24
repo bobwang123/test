@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include "route.h"
 #include "cost.h"
 #include "task.h"
 #include "vehicle.h"
@@ -181,13 +182,43 @@ Scheduler::_ignore_unreachable_orders_and_sort()
 }
 
 void
+Scheduler::_build_order_cost()
+{
+  // TODO: outer loop can be parallel
+  for (int i = 0; i < _num_sorted_orders; ++i)
+  {
+    OrderTask *order = _sorted_orders[i];
+    const CostMatrix::CostMapType &costs =
+      _cost_prob.costs(order->loc_from(), order->loc_to());
+    for (CostMatrix::CostMapType::const_iterator cit = costs.begin();
+         cit != costs.end(); ++cit)
+      order->add_route(new Route(*order, cit->first, cit->second));
+  }
+}
+
+void
 Scheduler::_build_order_dag()
 {
+  size_t num_edges = 0;
+  // TODO: outer loop can be parallel
+  for (int i = 0; i < _num_sorted_orders; ++i)
+  {
+    OrderTask *order = _sorted_orders[i];
+    for (int j = i + 1; j < _num_sorted_orders; ++j)
+    {
+      OrderTask *next_candidate = _sorted_orders[j];
+      if (order->connect(*next_candidate, _cost_prob,
+                         _DEFAULT_MAX_WAIT_TIME, _DEFAULT_MAX_MAX_EMPTY_DIST))
+        ++num_edges;
+    }
+  }
 }
 
 void
 Scheduler::_analyze_orders()
 {
+  _build_order_cost();
+  _build_order_dag();
 }
 
 void
