@@ -41,7 +41,7 @@ public:
   void
     compute_max_profit();
   const std::vector<Plan *>&
-    _sorted_candidate_plans();
+    sorted_candidate_plans();
   cJSON *
     plans_to_dict(const CostMatrix &cost_prob_mat) const;
 };

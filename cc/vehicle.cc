@@ -53,7 +53,7 @@ Vehicle::compute_max_profit()
 }
 
 const vector<Plan *>&
-Vehicle::_sorted_candidate_plans()
+Vehicle::sorted_candidate_plans()
 {
   cout << "Output top " << _candidate_num_limit
     << " plans with the greatest profit." << endl;
