@@ -27,6 +27,9 @@ public:
           const double avl_time = 0.0,
           const int candidate_num_limit = 10);
   ~Vehicle();
+  static bool
+    reverse_cmp(const Vehicle *va, const Vehicle *vb)
+    { return !(va->avl_time() < vb->avl_time()); }
 public:
   double
     avl_time() const { return _avl_time; }

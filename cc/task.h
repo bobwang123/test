@@ -77,6 +77,9 @@ public:
             const double load_time,
             const double unload_time);
     ~OrderTask();
+    static bool
+      reverse_cmp(const OrderTask *ta, const OrderTask *tb)
+      { return !(ta->expected_start_time() < tb->expected_start_time()); }
 public:
     const double
       load_time() const { return _load_time; }

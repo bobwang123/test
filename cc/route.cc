@@ -20,11 +20,8 @@ Route::~Route()
   for (std::vector<Step *>::iterator it = _next_steps.begin();
        it != _next_steps.end(); ++it)
     delete *it;
-  for (std::vector<EmptyRunTask *>::iterator it = _next_empty_task.begin();
+  for (std::list<EmptyRunTask *>::iterator it = _next_empty_task.begin();
        it != _next_empty_task.end(); ++it)
-    delete *it;
-  for (std::vector<Route *>::iterator it = _next_empty_route.begin();
-       it != _next_empty_route.end(); ++it)
     delete *it;
 }
 
@@ -77,7 +74,6 @@ Route::connect(OrderTask &task,
     connected = true;
     // record for later garbage collection
     _next_empty_task.push_back(empty_run);
-    _next_empty_route.push_back(empty_run_route);
   }
   return connected;
 }

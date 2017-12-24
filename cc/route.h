@@ -18,13 +18,12 @@ class Route
   double _profit;  // profit of this route
   double _max_profit;  // max profit of all plans starting from this route
   std::list<EmptyRunTask *> _next_empty_task;  // for garbage collection
-  std::list<Route *> _next_empty_route;  // for garbage collection
 public:
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();
   static bool
     reverse_cmp(const Route *ra, const Route *rb)
-    { return rb->max_profit() <= ra->max_profit(); }
+    { return !(ra->max_profit() < rb->max_profit()); }
 public:
   const std::string &
     name() const { return _name; }

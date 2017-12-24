@@ -26,7 +26,7 @@ class Plan
     }
     return step_arr;
   }
-  const std::size_t _NUM_RESERVED_STEPS
+  static const std::size_t _NUM_RESERVED_STEPS = 16;
 public:
   Plan(): _steps(_NUM_RESERVED_STEPS) {}
   ~Plan() {}
