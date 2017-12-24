@@ -32,6 +32,15 @@ private:
     _init_order_tasks_from_json(const char *filename);
   void
     _ignore_unreachable_orders_and_sort();
+  void
+    _build_order_dag();
+  void
+    _analyze_orders();
+public:
+  void
+    run();
+  void
+    dump_plans(const char *filename);
 };
 
 #endif  // __SCHEDULER_H__
