@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 #include <cassert>
 
 using namespace std;
@@ -26,7 +27,7 @@ namespace
 
 // ignore small probability predicted(virtual) orders
 const double
-Scheduler::_PROB_TH = 0.05;
+Scheduler::_PROB_TH = 0.5;
 
 const double
 Scheduler::_DEFAULT_LOAD_TIME = 5;
@@ -35,7 +36,7 @@ const double
 Scheduler::_DEFAULT_UNLOAD_TIME = 5;
 
 const double
-Scheduler::_DEFAULT_MAX_WAIT_TIME = 72;
+Scheduler::_DEFAULT_MAX_WAIT_TIME = 12;
 
 const double
 Scheduler::_DEFAULT_MAX_MAX_EMPTY_DIST = 500;
@@ -101,6 +102,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   const int num_orders = cJSON_GetArraySize(json_array_orders);
   _orders.reserve(num_orders);
   bool has_real = false;
+  // TODO: a change to improve using multi-thread
   for (int i = 0; i < num_orders; ++i)
   {
     cJSON *json_order = cJSON_GetArrayItem(json_array_orders, i);
@@ -113,8 +115,13 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     cJSON *pickup_time = cJSON_GetObjectItem(json_order, "orderedPickupTime");
     const double expected_start_time = _ms2hours(pickup_time->valuedouble);
     cJSON *order_is_virtual = cJSON_GetObjectItem(json_order, "isVirtual");
-    const bool is_virtual = order_is_virtual? order_is_virtual->valueint: false;
-    has_real = !is_virtual;
+    const bool is_virtual = !!(order_is_virtual? order_is_virtual->valueint: 0);
+    if (!is_virtual)
+    {
+      has_real = true;
+      vsp_debug && cout << "Found real order: " << from_city->valuestring << "->"
+        << to_city->valuestring << "\n";
+    }
     const double prob =
       is_virtual? _cost_prob.prob(from_loc, to_loc, expected_start_time): 1.0;
     if (is_virtual && prob < _PROB_TH)
@@ -236,7 +243,11 @@ Scheduler::dump_plans(const char *filename)
   cJSON *all_plans_sorted = cJSON_CreateArray();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
-    cJSON_AddItemToArray(all_plans_sorted, (*it)->plans_to_dict(_cost_prob));
+  {
+    Vehicle *v = *it;
+    v->sorted_candidate_plans();
+    cJSON_AddItemToArray(all_plans_sorted, v->plans_to_dict(_cost_prob));
+  }
   cJSON *json = cJSON_CreateObject();
   cJSON_AddItemToObjectCS(json, "data", all_plans_sorted);
   char *json_str = cJSON_PrintBuffered(json, 10000000, 1);
@@ -244,7 +255,6 @@ Scheduler::dump_plans(const char *filename)
   ofstream outf(filename);
   outf << json_str;
   outf.close();
-  cJSON_Hooks hk;
-  hk.free_fn(json_str);
+  free(json_str);
 }
 
