@@ -33,6 +33,12 @@ Scheduler::_DEFAULT_LOAD_TIME = 5;
 const double
 Scheduler::_DEFAULT_UNLOAD_TIME = 5;
 
+const double
+Scheduler::_DEFAULT_MAX_WAIT_TIME = 72;
+
+const double
+Scheduler::_DEFAULT_MAX_MAX_EMPTY_DIST = 500;
+
 Scheduler::Scheduler(const char *vehicle_file,
                      const char *order_file,
                      const CostMatrix &cst_prb,

@@ -19,6 +19,8 @@ class Scheduler
   static const double _PROB_TH;  // probability threshold to filter orders
   static const double _DEFAULT_LOAD_TIME;  // hours
   static const double _DEFAULT_UNLOAD_TIME;  // hours
+  static const double _DEFAULT_MAX_WAIT_TIME;  // hours
+  static const double _DEFAULT_MAX_MAX_EMPTY_DIST;  // km
 public:
   Scheduler(const char *order_file,
             const char *vehicle_file,
