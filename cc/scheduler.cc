@@ -5,6 +5,7 @@
 #include "fileio.h"
 #include <set>
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <cassert>
 
@@ -171,5 +172,42 @@ Scheduler::_ignore_unreachable_orders_and_sort()
     for (int i = 0; i < _num_sorted_orders; ++i)
       cout << _sorted_orders[i]->expected_start_time() << "\n";
   }
+}
+
+void
+Scheduler::_build_order_dag()
+{
+}
+
+void
+Scheduler::_analyze_orders()
+{
+}
+
+void
+Scheduler::run()
+{
+  _analyze_orders();
+  for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
+       it != _sorted_vehicles.end(); ++it)
+    (*it)->compute_max_profit();
+}
+
+void
+Scheduler::dump_plans(const char *filename)
+{
+  cJSON *all_plans_sorted = cJSON_CreateArray();
+  for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
+       it != _sorted_vehicles.end(); ++it)
+    cJSON_AddItemToArray(all_plans_sorted, (*it)->plans_to_dict(_cost_prob));
+  cJSON *json = cJSON_CreateObject();
+  cJSON_AddItemToObjectCS(json, "data", all_plans_sorted);
+  char *json_str = cJSON_PrintBuffered(json, 10000000, 1);
+  cJSON_Delete(json);
+  ofstream outf(filename);
+  outf << json_str;
+  outf.close();
+  cJSON_Hooks hk;
+  hk.free_fn(json_str);
 }
 
