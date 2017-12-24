@@ -23,7 +23,7 @@ public:
   ~Route();
   static bool
     reverse_cmp(const Route *ra, const Route *rb)
-    { return !(ra->max_profit() < rb->max_profit()); }
+    { return rb->max_profit() > ra->max_profit(); }
 public:
   const std::string &
     name() const { return _name; }
