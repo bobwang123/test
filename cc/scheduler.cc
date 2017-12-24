@@ -10,6 +10,8 @@
 
 using namespace std;
 
+extern const int vsp_debug;
+
 namespace
 {
   // convert milliseconds to hours since 1970-1-1 00:00:00
@@ -125,11 +127,11 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
   if (!has_real)
-    cout << "** Warning: No real orders found! There are only virtual orders." << endl;
+    cout << "** Warning: No real orders found! There are only virtual orders.\n";
   assert(_orders.size() <= num_orders);
   cout << "Ignore " << num_orders - _orders.size()
     << " virtual (predicted) orders in total " << num_orders
-    << " orders due to probability <" << _PROB_TH * 100 << "%" << endl;
+    << " orders due to probability <" << _PROB_TH * 100 << "%\n";
   _ignore_unreachable_orders_and_sort();
   return 0;
 }
@@ -146,15 +148,28 @@ Scheduler::_ignore_unreachable_orders_and_sort()
   _num_sorted_orders = all_reachable_orders.size();
   cout << "Ignore " << _orders.size() - _num_sorted_orders
     << " unreachable orders in total " << _orders.size()
-    << " large probability orders." << endl;
-  cout << _num_sorted_orders
-    << " reachable large probability orders to be scheduled." << endl;
+    << " large probability orders.\n"
+    << _num_sorted_orders
+    << " reachable large probability orders to be scheduled.\n";
   vector<OrderTask *> sorted_orders(all_reachable_orders.begin(),
                                     all_reachable_orders.end());
+  if (vsp_debug)
+  {
+    cout << "DEBUG - Unsorted Order Expected Start Time\n";
+    for (vector<OrderTask *>::iterator it = sorted_orders.begin();
+         it != sorted_orders.end(); ++it)
+      cout << (*it)->expected_start_time() << "\n";
+  }
   sort(sorted_orders.begin(), sorted_orders.end(), Task::reverse_cmp);
   // raw array should be faster than vector when randomly accessing
   _sorted_orders = new OrderTask *[_num_sorted_orders];
   for (vector<OrderTask *>::size_type i = 0; i < _num_sorted_orders; ++i)
     _sorted_orders[i] = sorted_orders[i];
+  if (vsp_debug)
+  {
+    cout << "DEBUG - Sorted Order Expected Start Time\n";
+    for (int i = 0; i < _num_sorted_orders; ++i)
+      cout << _sorted_orders[i]->expected_start_time() << "\n";
+  }
 }
 
