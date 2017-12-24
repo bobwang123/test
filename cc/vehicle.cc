@@ -76,6 +76,7 @@ Vehicle::_sorted_candidate_plans()
       candidate_plan->append(step);
     }
     _candidate_plans_sorted.push_back(candidate_plan);
+    ++c;
   }
   return _candidate_plans_sorted;
 }
