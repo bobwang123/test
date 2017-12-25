@@ -4,6 +4,7 @@
 #include "task.h"
 #include "vehicle.h"
 #include "fileio.h"
+#include "timer.h"
 #include <set>
 #include <algorithm>
 #include <fstream>
@@ -67,7 +68,10 @@ Scheduler::~Scheduler()
 int
 Scheduler::_init_vehicles_from_json(const char *filename)
 {
+  double t1 = get_wall_time();
   cJSON *json = parse_json_file(filename);
+  print_wall_time_diff(t1, "Parse vehicle JSON file");
+  t1 = get_wall_time();
   cJSON *json_array_vehicles = cJSON_GetObjectItem(json, "data");
   _num_sorted_vehicles = cJSON_GetArraySize(json_array_vehicles);
   _sorted_vehicles.reserve(_num_sorted_vehicles);
@@ -86,14 +90,20 @@ Scheduler::_init_vehicles_from_json(const char *filename)
     _sorted_vehicles.push_back(new Vehicle(name, avl_loc, avl_time));
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
+  print_wall_time_diff(t1, "Create vehicles with JSON objects");
+  t1 = get_wall_time();
   sort(_sorted_vehicles.begin(), _sorted_vehicles.end(), Vehicle::cmp);
+  print_wall_time_diff(t1, "Sort vehicles with avl_time");
   return 0;
 }
 
 int
 Scheduler::_init_order_tasks_from_json(const char *filename)
 {
+  double t1 = get_wall_time();
   cJSON *json = parse_json_file(filename);
+  print_wall_time_diff(t1, "Parse order JSON file");
+  t1 = get_wall_time();
   cJSON *json_array_orders = cJSON_GetObjectItem(json, "data");
   const int num_orders = cJSON_GetArraySize(json_array_orders);
   _orders.reserve(num_orders);
@@ -116,7 +126,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     {
       has_real = true;
       vsp_debug && cout << "Found real order: " << from_city->valuestring << "->"
-        << to_city->valuestring << "\n";
+        << to_city->valuestring << endl;
     }
     const double prob =
       is_virtual? _cost_prob.prob(from_loc, to_loc, expected_start_time): 1.0;
@@ -138,11 +148,12 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
   if (!has_real)
-    cout << "** Warning: No real orders found! There are only virtual orders.\n";
+    cout << "** Warning: No real order found! There are only virtual orders.\n";
   assert(_orders.size() <= num_orders);
   cout << "Ignore " << num_orders - _orders.size()
     << " virtual (predicted) orders in total " << num_orders
-    << " orders due to probability <" << _PROB_TH * 100 << "%\n";
+    << " orders due to probability <" << _PROB_TH * 100 << "%" << endl;
+  print_wall_time_diff(t1, "Create orders with JSON objects");
   _ignore_unreachable_orders_and_sort();
   return 0;
 }
@@ -150,6 +161,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
 void
 Scheduler::_ignore_unreachable_orders_and_sort()
 {
+  double t1 = get_wall_time();
   set<OrderTask *> all_reachable_orders;
   for (int i = 0; i < _num_sorted_vehicles; ++i)
     for (vector<OrderTask *>::iterator it = _orders.begin();
@@ -161,7 +173,9 @@ Scheduler::_ignore_unreachable_orders_and_sort()
     << " unreachable orders in total " << _orders.size()
     << " large probability orders.\n"
     << _num_sorted_orders
-    << " reachable large probability orders to be scheduled.\n";
+    << " reachable large probability orders to be scheduled." << endl;
+  print_wall_time_diff(t1, "Check and drop unreachable orders");
+  t1 = get_wall_time();
   vector<OrderTask *> sorted_orders(all_reachable_orders.begin(),
                                     all_reachable_orders.end());
   if (vsp_debug)
@@ -170,6 +184,7 @@ Scheduler::_ignore_unreachable_orders_and_sort()
     for (vector<OrderTask *>::iterator it = sorted_orders.begin();
          it != sorted_orders.end(); ++it)
       cout << (*it)->expected_start_time() << "\n";
+    cout << endl;
   }
   sort(sorted_orders.begin(), sorted_orders.end(), Task::cmp);
   // raw array should be faster than vector when randomly accessing
@@ -181,12 +196,15 @@ Scheduler::_ignore_unreachable_orders_and_sort()
     cout << "DEBUG - Sorted Order Expected Start Time\n";
     for (int i = 0; i < _num_sorted_orders; ++i)
       cout << _sorted_orders[i]->expected_start_time() << "\n";
+    cout << endl;
   }
+  print_wall_time_diff(t1, "Create sorted order array");
 }
 
 void
 Scheduler::_build_order_cost()
 {
+  double t1 = get_wall_time();
   // TODO: outer loop can be parallel
   for (int i = 0; i < _num_sorted_orders; ++i)
   {
@@ -197,11 +215,13 @@ Scheduler::_build_order_cost()
          cit != costs.end(); ++cit)
       order->add_route(new Route(*order, cit->first, cit->second));
   }
+  print_wall_time_diff(t1, "Init order costs");
 }
 
 void
 Scheduler::_build_order_dag()
 {
+  double t1 = get_wall_time();
   size_t num_edges = 0;
   // TODO: outer loop can be parallel
   for (int i = 0; i < _num_sorted_orders; ++i)
@@ -216,6 +236,7 @@ Scheduler::_build_order_dag()
     }
   }
   cout << "Create " << num_edges << " edges for order DAG.\n";
+  print_wall_time_diff(t1, "Create order DAG");
 }
 
 void
@@ -229,14 +250,17 @@ void
 Scheduler::run()
 {
   _analyze_orders();
+  double t1 = get_wall_time();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
     (*it)->compute_max_profit();
+  print_wall_time_diff(t1, "Compute max profit of vehicles");
 }
 
 void
 Scheduler::dump_plans(const char *filename)
 {
+  double t1 = get_wall_time();
   cJSON *all_plans_sorted = cJSON_CreateArray();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
@@ -245,13 +269,18 @@ Scheduler::dump_plans(const char *filename)
     v->sorted_candidate_plans();
     cJSON_AddItemToArray(all_plans_sorted, v->plans_to_dict(_cost_prob));
   }
+  print_wall_time_diff(t1, "Sort and convert plans to JSON for vehicles");
+  t1 = get_wall_time();
   cJSON *json = cJSON_CreateObject();
   cJSON_AddItemToObjectCS(json, "data", all_plans_sorted);
   char *json_str = cJSON_PrintBuffered(json, 10000000, 1);
   cJSON_Delete(json);
+  print_wall_time_diff(t1, "Convert JSON object to char *");
+  t1 = get_wall_time();
   ofstream outf(filename);
   outf << json_str;
   outf.close();
   free(json_str);
+  print_wall_time_diff(t1, "Print JSON to file and free char *");
 }
 
