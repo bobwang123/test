@@ -86,7 +86,7 @@ Scheduler::_init_vehicles_from_json(const char *filename)
     _sorted_vehicles.push_back(new Vehicle(name, avl_loc, avl_time));
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
-  sort(_sorted_vehicles.begin(), _sorted_vehicles.end(), Vehicle::reverse_cmp);
+  sort(_sorted_vehicles.begin(), _sorted_vehicles.end(), Vehicle::cmp);
   return 0;
 }
 
@@ -171,7 +171,7 @@ Scheduler::_ignore_unreachable_orders_and_sort()
          it != sorted_orders.end(); ++it)
       cout << (*it)->expected_start_time() << "\n";
   }
-  sort(sorted_orders.begin(), sorted_orders.end(), Task::reverse_cmp);
+  sort(sorted_orders.begin(), sorted_orders.end(), Task::cmp);
   // raw array should be faster than vector when randomly accessing
   _sorted_orders = new OrderTask *[_num_sorted_orders];
   for (vector<OrderTask *>::size_type i = 0; i < _num_sorted_orders; ++i)

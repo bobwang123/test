@@ -26,8 +26,8 @@ public:
        const std::string &name);
   virtual ~Task();
   static bool
-    reverse_cmp(const Task *ta, const Task *tb)
-    { return tb->expected_start_time() < ta->expected_start_time(); }
+    cmp(const Task *ta, const Task *tb)
+    { return ta->expected_start_time() < tb->expected_start_time(); }
 public:
   const std::string &
     name() const { return _name; }
