@@ -29,7 +29,7 @@ public:
   ~Vehicle();
   static bool
     reverse_cmp(const Vehicle *va, const Vehicle *vb)
-    { return vb->avl_time() > va->avl_time(); }
+    { return vb->avl_time() < va->avl_time(); }
 public:
   double
     avl_time() const { return _avl_time; }

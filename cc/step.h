@@ -14,7 +14,7 @@ public:
   ~Step();
   static bool
     reverse_cmp(const Step *sa, const Step *sb)
-    { return sb->max_profit() > sa->max_profit(); }
+    { return sb->max_profit() < sa->max_profit(); }
 public:
   const double
     prob() const { return _order_task.prob(); }
