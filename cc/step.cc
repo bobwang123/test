@@ -27,7 +27,7 @@ Step::update_max_profit()
   Route *order_route = _order_task.max_profit_route();
   assert(order_route);
   // update max profit recursively if not done yet
-  if (Consts::is_none(order_route->max_profit()))
+  if (Consts::is_none(order_route->max_profit()))  // DEAD CODE?
     order_route->update_max_profit();
   _max_profit = _empty_run_route.profit() + order_route->max_profit();
 }
