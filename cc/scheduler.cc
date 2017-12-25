@@ -215,6 +215,7 @@ Scheduler::_build_order_dag()
         ++num_edges;
     }
   }
+  cout << "Create " << num_edges << " edges for order DAG.\n";
 }
 
 void
