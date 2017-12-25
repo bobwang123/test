@@ -45,11 +45,7 @@ Scheduler::Scheduler(const char *vehicle_file,
                      const char *order_file,
                      const CostMatrix &cst_prb,
                      void *opt)
-  :_sorted_vehicles(0),
-  _num_sorted_vehicles(0),
-  _sorted_orders(0),
-  _num_sorted_orders(0),
-  _cost_prob(cst_prb),
+  : _num_sorted_vehicles(0), _num_sorted_orders(0), _cost_prob(cst_prb),
   _opt(opt)
 {
   if (!_init_vehicles_from_json(vehicle_file))
