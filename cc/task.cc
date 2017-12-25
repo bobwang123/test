@@ -15,14 +15,15 @@ Task::Task(const CostMatrix::CityIdxType loc_start,
   : _location(),
   _expected_start_time(start_time),
   _occur_prob(occur_prob),
-  _routes(0),
   _is_virtual(is_virtual),
   _name(name)
 {
-  // cast const only in the constructor
+  // init _location: cast const only in the constructor
   CostMatrix::CityIdxType *p = const_cast<CostMatrix::CityIdxType *>(_location);
   p[0] = loc_start;
   p[1] = loc_end;
+  // speed up adding more _routes
+  _routes.reserve(5);
 }
 
 Task::~Task()
@@ -79,7 +80,7 @@ OrderTask::max_profit_route()
   for (vector<Route *>::iterator it = rs.begin(); it != rs.end(); ++it)
     (*it)->update_max_profit();
   sort(rs.begin(), rs.end(), Route::reverse_cmp);
-  _max_profit_route = rs[0];
+  _max_profit_route = rs.front();
   return _max_profit_route;
 }
 
