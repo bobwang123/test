@@ -280,7 +280,7 @@ class Step(object):
         order_route = self._order_task.max_profit_route()
         assert isinstance(order_route, Route)
         # update max profit recursively if not done yet
-        if order_route.max_profit is None:
+        if order_route.max_profit is None:  # DEAD CODE ?
             order_route.update_max_profit()
         self._max_profit = self._empty_run_route.profit + order_route.max_profit
 
