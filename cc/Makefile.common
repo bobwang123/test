@@ -19,6 +19,8 @@ LIBS    += -lm
 PLATFORM:=$(shell uname -s)
 ifeq ($(PLATFORM),Darwin)
     # LDFLAGS += -Wl,-stack_size,0x1000000
+    CFLAGS += -I/usr/local/opt/llvm/include -fopenmp
+    LDFLAGS += -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib -fopenmp
     CC := /usr/local/opt/llvm/bin/clang++
 endif
 # Set large stack size in *RUNTIME* on CentOS:

@@ -205,7 +205,6 @@ void
 Scheduler::_build_order_cost()
 {
   double t1 = get_wall_time();
-  // TODO: outer loop can be parallel
   for (int i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *order = _sorted_orders[i];
@@ -223,7 +222,7 @@ Scheduler::_build_order_dag()
 {
   double t1 = get_wall_time();
   size_t num_edges = 0;
-  // TODO: outer loop can be parallel
+  #pragma omp parallel for
   for (int i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *order = _sorted_orders[i];
@@ -232,7 +231,7 @@ Scheduler::_build_order_dag()
       OrderTask *next_candidate = _sorted_orders[j];
       if (order->connect(*next_candidate, _cost_prob,
                          _DEFAULT_MAX_WAIT_TIME, _DEFAULT_MAX_MAX_EMPTY_DIST))
-        ++num_edges;
+        ;//++num_edges;
     }
   }
   cout << "Create " << num_edges << " edges for order DAG.\n";
