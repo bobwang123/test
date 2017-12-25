@@ -19,7 +19,7 @@ class Plan
     {
       cJSON *empty_and_order = (*cit)->to_dict(cost_prob_mat);
       cJSON *empty = cJSON_DetachItemFromArray(empty_and_order, 0);
-      cJSON *order = cJSON_DetachItemFromArray(empty_and_order, 1);
+      cJSON *order = cJSON_DetachItemFromArray(empty_and_order, 0);
       cJSON_Delete(empty_and_order);  // make sure no memory leak
       cJSON_AddItemToArray(step_arr, empty);
       cJSON_AddItemToArray(step_arr, order);
