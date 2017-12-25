@@ -33,8 +33,6 @@ public:
     profit();
   std::vector<Step *> &
     next_steps() { return _next_steps; }
-  const double
-    expected_end_time() const { return _expected_end_time; }
   const bool
     connect(OrderTask &task,
             const CostMatrix &cost_prob_mat,
@@ -44,16 +42,15 @@ public:
     update_max_profit();
   const double
     max_profit() const { return _max_profit; }
+  const double
+    expected_end_time() const { return _expected_end_time; }
   const bool
     is_terminal() const
     {
       if (Consts::is_none(max_profit()))
         return false;
-      if (_next_steps.empty())
-        return true;
-      if (_next_steps.front()->max_profit() <= 0)
-        return true;
-      return false;
+      return _next_steps.empty()
+        || (_next_steps.front()->max_profit() <= 0);
     }
   void
     add_next_step(Step *step) { _next_steps.push_back(step); }
