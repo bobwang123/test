@@ -30,11 +30,11 @@ public:
   const double
     expense() const { return _cost.expense(); }
   const double
-    expected_end_time() const { return _expected_end_time; }
+    profit();
   std::vector<Step *> &
     next_steps() { return _next_steps; }
   const double
-    profit();
+    expected_end_time() const { return _expected_end_time; }
   const bool
     connect(OrderTask &task,
             const CostMatrix &cost_prob_mat,
@@ -51,7 +51,7 @@ public:
         return false;
       if (_next_steps.empty())
         return true;
-      if (_next_steps.at(0)->max_profit() <= 0)
+      if (_next_steps.front()->max_profit() <= 0)
         return true;
       return false;
     }

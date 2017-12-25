@@ -38,7 +38,7 @@ public:
     {
       if (_steps.empty())
         return Consts::DOUBLE_NONE;
-      return _steps.at(0)->max_profit();
+      return _steps.front()->max_profit();
     }
   const double
     profit() const

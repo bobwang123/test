@@ -37,7 +37,7 @@ Step::next_max_profit_step()
 {
   if (is_terminal())
     return 0;
-  return _order_task.max_profit_route()->next_steps().at(0);
+  return _order_task.max_profit_route()->next_steps().front();
 }
 
 const bool

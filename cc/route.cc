@@ -66,7 +66,7 @@ Route::connect(OrderTask &task,
     EmptyRunTask *empty_run =
       new EmptyRunTask(_this_task.loc_to(), task.loc_from(),
                        empty_run_start_time, task.prob(),
-                       task.is_virtual(), "", wait_time);
+                       task.is_virtual(), "", wait_time);  // with no name
     Route *empty_run_route = new Route(*empty_run, cit->first, c);
     empty_run->add_route(empty_run_route);
     Step *candidate_step = new Step(*empty_run_route, task);
@@ -93,7 +93,7 @@ Route::update_max_profit()
     if (Consts::is_none((*it)->max_profit()))
       (*it)->update_max_profit();
   sort(_next_steps.begin(), _next_steps.end(), Step::reverse_cmp);
-  Step *max_profit_step = _next_steps.at(0);
+  Step *max_profit_step = _next_steps.front();
   assert(max_profit_step);
   _max_profit = profit();
   if (max_profit_step->max_profit() > 0.0)
