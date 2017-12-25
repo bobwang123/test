@@ -73,12 +73,12 @@ public:
   OrderTask(const CostMatrix::CityIdxType loc_start,
             const CostMatrix::CityIdxType loc_end,
             const double start_time,
-            const double occur_prob,
-            const bool is_virtual,
-            const std::string &name,
-            const double receivable,
-            const double load_time,
-            const double unload_time);
+            const double occur_prob=1.0,
+            const bool is_virtual=false,
+            const std::string &name="",
+            const double receivable=0.0,
+            const double load_time=0.0,
+            const double unload_time=0.0);
     ~OrderTask();
 public:
     const double
