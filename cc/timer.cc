@@ -17,7 +17,7 @@ double get_wall_time()
 void print_wall_time_diff(const double start, const char *msg)
 {
   const double now = get_wall_time();
-  cout << "Wall time - " << msg << " :"
+  cout << "Wall time - " << msg << " : "
     << std::fixed << std::setprecision(4) << now - start
     << " s" << endl;
 }
