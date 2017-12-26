@@ -26,7 +26,7 @@ namespace
   }
 }
 
-// ignore small probability predicted(virtual) orders
+// drop small probability predicted(virtual) orders
 const double
 Scheduler::_PROB_TH = 0.05;
 
@@ -57,15 +57,13 @@ Scheduler::~Scheduler()
 {
   double t1 = get_wall_time();
   // #pragma omp parallel for
-  for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
-       it != _sorted_vehicles.end(); ++it)
-    delete *it;
+  for (int i = 0; i < _sorted_vehicles.size(); ++i)
+    delete _sorted_vehicles[i];
   print_wall_time_diff(t1, "Destruct vehicles");
   t1 = get_wall_time();
   // #pragma omp parallel for
-  for (std::vector<OrderTask *>::iterator it = _orders.begin();
-       it != _orders.end(); ++it)
-    delete *it;
+  for (int i = 0; i < _orders.size(); ++i)
+    delete _orders[i];
   delete[] _sorted_orders;
   _sorted_orders = 0;
   print_wall_time_diff(t1, "Destruct OrderTasks");
@@ -111,11 +109,10 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   print_wall_time_diff(t1, "Parse order JSON file");
   t1 = get_wall_time();
   cJSON *json_array_orders = cJSON_GetObjectItem(json, "data");
-  const int num_orders = cJSON_GetArraySize(json_array_orders);
-  _orders.reserve(num_orders);
-  bool has_real = false;
-  // TODO: a change to improve using multi-thread
-  for (int i = 0; i < num_orders; ++i)
+  const int num_orig_orders = cJSON_GetArraySize(json_array_orders);
+  vector<OrderTask *> orders(num_orig_orders, static_cast<OrderTask*>(0));
+  #pragma omp parallel for
+  for (int i = 0; i < num_orig_orders; ++i)
   {
     cJSON *json_order = cJSON_GetArrayItem(json_array_orders, i);
     cJSON *from_city = cJSON_GetObjectItem(json_order, "fromCity");
@@ -129,15 +126,12 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     cJSON *order_is_virtual = cJSON_GetObjectItem(json_order, "isVirtual");
     const bool is_virtual = !!(order_is_virtual? order_is_virtual->valueint: 0);
     if (!is_virtual)
-    {
-      has_real = true;
       vsp_debug && cout << "Found real order: " << from_city->valuestring << "->"
         << to_city->valuestring << endl;
-    }
     const double prob =
       is_virtual? _cost_prob.prob(from_loc, to_loc, expected_start_time): 1.0;
     if (is_virtual && prob < _PROB_TH)
-      continue;  // ignore this virtual order due to too small probability
+      continue;  // drop this virtual order due to too small probability
     cJSON *order_id = cJSON_GetObjectItem(json_order, "orderId");
     const char *name = order_id->valuestring;
     cJSON *order_receivable = cJSON_GetObjectItem(json_order, "orderMoney");
@@ -148,39 +142,53 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     cJSON *order_unload_time = cJSON_GetObjectItem(json_order, "unloadingTime");
     const double unload_time = order_unload_time->type == cJSON_NULL
       ? _DEFAULT_UNLOAD_TIME: order_unload_time->valuedouble;
-    _orders.push_back(new OrderTask(from_loc, to_loc, expected_start_time,
-                                    prob, is_virtual, name, receivable,
-                                    load_time, unload_time));
+    orders[i] = new OrderTask(from_loc, to_loc, expected_start_time,
+                              prob, is_virtual, name, receivable,
+                              load_time, unload_time);
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
-  if (!has_real)
-    cout << "** Warning: No real order found! There are only virtual orders.\n";
-  assert(_orders.size() <= num_orders);
-  cout << "Ignore " << num_orders - _orders.size()
-    << " virtual (predicted) orders in total " << num_orders
-    << " orders due to probability <" << _PROB_TH * 100 << "%" << endl;
+  const size_t num_orders = num_orig_orders -
+    count(orders.begin(), orders.end(), static_cast<OrderTask*>(0));
+  cout << "Drop " << num_orig_orders - num_orders
+    << " virtual (predicted) orders in total " << num_orig_orders
+    << " orders due to probability < " << _PROB_TH * 100 << "%" << endl;
   print_wall_time_diff(t1, "Create orders with JSON objects");
-  _ignore_unreachable_orders_and_sort();
+  _orders = orders;
+  _ignore_unreachable_orders_and_sort(num_orders);
   return 0;
 }
 
+namespace
+{
+  inline bool _is_real(OrderTask *t) { return t && !t->is_virtual(); }
+}
+
 void
-Scheduler::_ignore_unreachable_orders_and_sort()
+Scheduler::_ignore_unreachable_orders_and_sort(const size_t num_orders)
 {
   double t1 = get_wall_time();
   set<OrderTask *> all_reachable_orders;
   for (int i = 0; i < _num_sorted_vehicles; ++i)
     for (vector<OrderTask *>::iterator it = _orders.begin();
          it != _orders.end(); ++it)
-      if (_sorted_vehicles[i]->connect(*(*it), _cost_prob))
+      if (*it && _sorted_vehicles[i]->connect(*(*it), _cost_prob))
         all_reachable_orders.insert(*it);
   _num_sorted_orders = all_reachable_orders.size();
-  cout << "Ignore " << _orders.size() - _num_sorted_orders
-    << " unreachable orders in total " << _orders.size()
-    << " large probability orders.\n"
-    << _num_sorted_orders
-    << " reachable large probability orders to be scheduled." << endl;
+  assert(_num_sorted_orders <= num_orders);
+  cout << "Drop " << num_orders - _num_sorted_orders
+    << " unreachable orders in total " << num_orders
+    << " large probability orders.\n";
   print_wall_time_diff(t1, "Check and drop unreachable orders");
+  t1 = get_wall_time();
+  const int num_real_orders =
+    count_if(_orders.begin(), _orders.end(), _is_real);
+  if (num_real_orders)
+    cout << num_real_orders << " real orders found.\n";
+  else
+    cout << "** Warning: No real order found! There are only virtual orders.\n";
+    cout << _num_sorted_orders
+    << " reachable large probability orders to be scheduled." << endl;
+  print_wall_time_diff(t1, "Count real orders");
   t1 = get_wall_time();
   vector<OrderTask *> sorted_orders(all_reachable_orders.begin(),
                                     all_reachable_orders.end());

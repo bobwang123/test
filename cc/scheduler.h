@@ -33,7 +33,7 @@ private:
   int
     _init_order_tasks_from_json(const char *filename);
   void
-    _ignore_unreachable_orders_and_sort();
+    _ignore_unreachable_orders_and_sort(const std::size_t num_orders);
   void
     _build_order_cost();
   void
