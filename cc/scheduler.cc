@@ -221,7 +221,7 @@ void
 Scheduler::_build_order_dag()
 {
   double t1 = get_wall_time();
-  size_t num_edges = 0;
+  vector<size_t> num_edges(_num_sorted_orders, 0);
   #pragma omp parallel for
   for (int i = 0; i < _num_sorted_orders; ++i)
   {
@@ -231,10 +231,14 @@ Scheduler::_build_order_dag()
       OrderTask *next_candidate = _sorted_orders[j];
       if (order->connect(*next_candidate, _cost_prob,
                          _DEFAULT_MAX_WAIT_TIME, _DEFAULT_MAX_MAX_EMPTY_DIST))
-        ;//++num_edges;
+        ++num_edges[i];
     }
   }
-  cout << "Create " << num_edges << " edges for order DAG.\n";
+  size_t total_num_edges = 0;
+  #pragma omp parallel for reduction(+:total_num_edges)
+  for (register int i = 0; i < _num_sorted_orders; ++i)
+    total_num_edges += num_edges[i];
+  cout << "Create " << total_num_edges << " edges for order DAG.\n";
   print_wall_time_diff(t1, "Create order DAG");
 }
 
