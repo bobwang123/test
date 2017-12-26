@@ -15,7 +15,6 @@ class Scheduler
   OrderTask **_sorted_orders;  // filtered orders sorted by expected_start_time
   std::size_t _num_sorted_orders;
   const CostMatrix &_cost_prob;
-  void *_opt;
   static const double _PROB_TH;  // probability threshold to filter orders
   static const double _DEFAULT_LOAD_TIME;  // hours
   static const double _DEFAULT_UNLOAD_TIME;  // hours
@@ -24,8 +23,7 @@ class Scheduler
 public:
   Scheduler(const char *order_file,
             const char *vehicle_file,
-            const CostMatrix &cst_prb,
-            void *opt);
+            const CostMatrix &cst_prb);
   ~Scheduler();
 private:
   int
