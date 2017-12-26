@@ -55,14 +55,20 @@ Scheduler::Scheduler(const char *vehicle_file,
 
 Scheduler::~Scheduler()
 {
+  double t1 = get_wall_time();
+  // #pragma omp parallel for
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
     delete *it;
+  print_wall_time_diff(t1, "Destruct vehicles");
+  t1 = get_wall_time();
+  // #pragma omp parallel for
   for (std::vector<OrderTask *>::iterator it = _orders.begin();
        it != _orders.end(); ++it)
     delete *it;
   delete[] _sorted_orders;
   _sorted_orders = 0;
+  print_wall_time_diff(t1, "Destruct OrderTasks");
 }
 
 int
