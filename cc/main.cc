@@ -28,7 +28,7 @@ int main()
   print_wall_time_diff(t1, "Total Scheduler::run");
 
   t1 = get_wall_time();
-  sh.dump_plans("cxx_outplan.json");
+  sh.dump_plans("cxx_outplans.json");
   print_wall_time_diff(t1, "Total Scheduler::dump_plans");
 
   print_wall_time_diff(tg1, "Total");
