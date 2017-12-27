@@ -125,7 +125,7 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
   cJSON_AddItemToObjectCS(route_dict, "unLoadingTime",
                           cJSON_CreateNumber(_this_task.unload_time()));
   cJSON_AddItemToObjectCS(route_dict, "isVirtual",
-                          cJSON_CreateBool(_this_task.is_virtual()));
+                          cJSON_CreateNumber(_this_task.is_virtual()));
   cJSON_AddItemToObjectCS(route_dict, "routeKey",
                           cJSON_CreateString(_name.c_str()));
   cJSON_AddItemToObjectCS(route_dict, "distance",
