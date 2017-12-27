@@ -12,15 +12,15 @@ OBJS := $(subst .cc,.o,$(SRCS))
 DEPS := $(subst .cc,.d,$(SRCS))
 
 CC      := g++
-CFLAGS  += -Wall
-LDFLAGS +=
+CFLAGS  += -Wall -fopenmp
+LDFLAGS += -fopenmp
 LIBS    += -lm
 
 PLATFORM:=$(shell uname -s)
 ifeq ($(PLATFORM),Darwin)
     # LDFLAGS += -Wl,-stack_size,0x1000000
-    CFLAGS += -I/usr/local/opt/llvm/include -fopenmp
-    LDFLAGS += -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib -fopenmp
+    CFLAGS += -I/usr/local/opt/llvm/include
+    LDFLAGS += -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib
     CC := /usr/local/opt/llvm/bin/clang++
 endif
 # Set large stack size in *RUNTIME* on CentOS:
