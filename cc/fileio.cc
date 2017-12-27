@@ -1,6 +1,7 @@
 #include "fileio.h"
 #include <iostream>
 #include <fstream>
+#include <cerrno>
 #include <cstring>
 
 using namespace std;
