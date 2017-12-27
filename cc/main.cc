@@ -32,6 +32,8 @@ compute(Scheduler *sh)
 void
 upload(const char *api)
 {
+  if (!api)
+    return;
   string cmd = "curl --output curl.log --include --silent --show-error --form resultsStr=<";
   cmd += _OUTPUT_PLAN_FILE;
   cmd += ";type=text/plain ";
