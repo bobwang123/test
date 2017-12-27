@@ -55,6 +55,7 @@ multi_proc_main(const char *api, Scheduler *sh)
     /* This is the child process.
        Close other end first. */
     close (mypipe[0]);
+    // TODO: put cm and sh here
     compute(sh);
     write_to_pipe (mypipe[1]);
     return EXIT_SUCCESS;
