@@ -111,7 +111,7 @@ class CostMatrix(object):
             "prob_matrix": self._prob_mat
         }
         with open(filename, "w") as f:
-            json.dump(json_dict, f, ensure_ascii=False, indent=4)
+            json.dump(json_dict, f, ensure_ascii=False)
 
 
 if __name__ == "__main__":
