@@ -248,7 +248,7 @@ Scheduler::_build_order_dag()
   }
   size_t total_num_edges = 0;
   #pragma omp parallel for reduction(+:total_num_edges)
-  for (register int i = 0; i < _num_sorted_orders; ++i)
+  for (int i = 0; i < _num_sorted_orders; ++i)
     total_num_edges += num_edges[i];
   cout << "Create " << total_num_edges << " edges for order DAG.\n";
   print_wall_time_diff(t1, "Create order DAG");
