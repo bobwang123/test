@@ -12,7 +12,7 @@ UNIQ_RUN_DIR:=run_$(MARK)/$(TIME_STAMP)_$(RANDOM_INT)
 
 # select optimization engine
 ifeq ($(ENGINE),C++)
-    CMD_RUN:= /usr/bin/time ../../cc/vsp 0 \
+    CMD_RUN:= /usr/bin/time env OMP_NUM_THREADS=6 ../../cc/vsp 0 \
 	"$(ORDER_API)?mark=$(MARK)" \
 	"$(VEHICLE_API)?mark=$(MARK)" \
 	"$(UPLOAD_API)?mark=$(MARK)"
