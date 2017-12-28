@@ -1,0 +1,42 @@
+# Update cost and probability matrix
+
+COST_CACHE_FILE:=cache.cost.http_api.json
+PROB_CACHE_FILE:=cache.probability.http_api.json
+COST_PROB_CC_CACHE_FILE:=cost_prob.cc.json
+
+COST_API:=http://139.198.5.125/OwnLogistics/api/own/city/cost
+PROB_API:=http://139.198.5.125/OwnLogistics/api/own/city/statistics
+
+# --silent --show-error
+CURL_CFG:=--verbose
+
+COST_GEN:=./python/cost.py
+
+.PHONY: all update-cost update-prob
+
+# use RAM disk to speed up file IO
+RAM_DISK_PATH:=/dev/shm
+
+all: $(COST_PROB_CC_CACHE_FILE)
+	mv $< $(RAM_DISK_PATH)/$< \
+	    && ln -sf $(RAM_DISK_PATH)/$<
+
+$(COST_PROB_CC_CACHE_FILE): update-cost  update-prob
+	mv $@ $@.$$$$ \
+	    && /usr/bin/time python $(COST_GEN) $(COST_CACHE_FILE) $(PROB_CACHE_FILE)
+
+update-cost:
+	/usr/bin/time curl $(CURL_CFG) $(COST_API) -o $(COST_CACHE_FILE)
+
+update-prob:
+	/usr/bin/time curl $(CURL_CFG) $(PROB_API) -o $(PROB_CACHE_FILE)
+
+
+.PHONY: clean distclean
+clean-cmd:=$(RM) $(COST_PROB_CC_CACHE_FILE)
+distclean-cmd:=$(clean-cmd) $(COST_CACHE_FILE) $(PROB_CACHE_FILE)
+clean:
+	$(clean-cmd)
+
+distclean:
+	$(distclean-cmd)

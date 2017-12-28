@@ -21,20 +21,16 @@ var get_client_ip = function(req) {
     return ip;
 };
 
-var COST_CACHE_FILE = "cost.http_api.json";
-var PROB_CACHE_FILE = "probability.http_api.json";
-var COST_PROB_CC_CACHE_FILE = "cost_prob.cc.json";
-
 var server = http.createServer(function (request, response) {
     var myDate = new Date();
     console.log("- Time = " + myDate.toLocaleString( ))
     var params = url.parse(request.url, true).query;
     var client_ip = get_client_ip(request)
     if (!params["simulateCode"] && !params["update"]) {
-        console.log("- Ignore illegal request from IP=" + client_ip);
-        console.log("- Refused to respond the illegal request!")
-        return ;
+        console.log("- Refuse to respond illegal request from IP=" + client_ip);
+        return; // drop illegal requests
     } else {
+        // mark legal requests
         console.log("- Get a legal request from IP=" + client_ip);
     }
     response.writeHead(200, {'Content-Type': 'text/plain:charset=utf-8'});
@@ -48,23 +44,18 @@ var server = http.createServer(function (request, response) {
     var mark = params["simulateCode"];
     if (need_update) {
         response.write("### Updating cost matrix and probability matrix ...\n");
-        var cost_api = "http://139.198.5.125/OwnLogistics/api/own/city/cost";
-        var prob_api = "http://139.198.5.125/OwnLogistics/api/own/city/statistics";
-        var curl_cfg = " --verbose "; // " --silent --show-error ";
-        var cmd_cost = "echo curl-cost && /usr/bin/time curl" + curl_cfg + cost_api + " -o " + COST_CACHE_FILE;
-        var cmd_prob = "echo curl-prob && /usr/bin/time curl" + curl_cfg + prob_api + " -o " + PROB_CACHE_FILE;
-        // cmd to create COST_PROB_CC_CACHE_FILE, i.e. cost_prob.cc.json
-        var cmd_cost_prob_cc = "/usr/bin/time python python/cost.py " + COST_CACHE_FILE + " " + PROB_CACHE_FILE;
-        cmd_cost_prob_cc += " && mv " + COST_CACHE_FILE + " /dev/shm/" + COST_CACHE_FILE;
-        cmd_cost_prob_cc += " && ln -sf /dev/shm/" + COST_CACHE_FILE;  // speed up file reading if possible
-        var cmd = cmd_cost + ";\n" + cmd_prob + ";\n" + cmd_cost_prob_cc + "; true";  // "true" force to continue
-        console.log(cmd);
-        var update_stdout = child_process.execSync(cmd);
-        console.log('stdout: ' + update_stdout);
-        console.log("- Finish updating cost and probability matrix.\n");
-        response.write("### Finish updating cost and probability matrix.\n");
-        if (!mark) {
+        try {
+            var update_stdout = child_process.execFileSync("make",
+                ["-j2", "--ignore-errors", "-f", "Makefile-update-db"])
+            console.log('stdout: ' + update_stdout);
+            console.log("- Finish updating cost and probability matrix.\n");
+            response.write("### Finish updating cost and probability matrix.\n");
             response.write("### Not run because no simulateCode is specified.\n");
+        } catch (e) {
+            console.error("- Error caught by catch block: ", e);
+            response.write("### FAILED to update cost and probability matrix.\n");
+        }
+        if (!mark) {
             response.write("### DONE.\n");
             response.end();
             return;
