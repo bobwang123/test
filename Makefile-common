@@ -5,3 +5,7 @@ COST_PROB_CC_CACHE_FILE:=cost_prob.cc.json
 
 COST_API:=http://139.198.5.125/OwnLogistics/api/own/city/cost
 PROB_API:=http://139.198.5.125/OwnLogistics/api/own/city/statistics
+
+ORDER_API:=http://139.198.5.125/OwnLogistics/api/own/orders
+VEHICLE_API:=http://139.198.5.125/OwnLogistics/api/own/vehicles
+UPLOAD_API:=http://139.198.5.125/OwnLogistics/api/own/routes/result
