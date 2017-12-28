@@ -35,12 +35,14 @@ var server = http.createServer(function (request, response) {
     }
     response.writeHead(200, {'Content-Type': 'text/plain:charset=utf-8'});
     response.write("### Arguments \n")
+    // dump arguments
     for (var name in params) {
         console.log("- Request params['" + name + "']=" + params[name]);
         response.write(name + "=" + params[name] + " ");
         response.write("\n");
     }
-    var need_update = params["update"];
+    // update cost/prob info
+    var need_update = Number(params["update"]);
     var mark = params["simulateCode"];
     if (need_update) {
         response.write("### Updating cost matrix and probability matrix ...\n");
@@ -55,56 +57,36 @@ var server = http.createServer(function (request, response) {
             console.error("- Error caught by catch block: ", e);
             response.write("### FAILED to update cost and probability matrix.\n");
         }
+	// update only without running opimization
         if (!mark) {
             response.write("### DONE.\n");
             response.end();
             return;
         }
     }
+    var engine = function (eng) {
+        return (eng && (eng[0] === 'c' || eng[0] === 'C')) ? "C++": "Python";
+    }(params["engine"]);
     response.write("### Start optimization ...\n");
     console.log("- Start optimization ...");
-    var get_engine_cmd = function(eng) {
-        var uniq_rundir = "run_" + mark + "/" + Date.now() + "_" + crypto.randomBytes(3).toString('hex') + "/";
-        var cmd_ln = ""
-            + "ln -sf ../../" + COST_CACHE_FILE + "; " + "ln -sf ../../" + PROB_CACHE_FILE + "; "
-            + "ln -sf ../../" + COST_PROB_CC_CACHE_FILE + "; "
-        // Python command
-        var cmd_python_cc_flags = "";  // prepare for C++ version
-        var cmd_python_run = "/usr/bin/time python -O ../../python/ " + cmd_python_cc_flags + " "
-            + "--order-file='http://139.198.5.125/OwnLogistics/api/own/orders?mark=" + mark + "' "
-            + "--vehicle-file='http://139.198.5.125/OwnLogistics/api/own/vehicles?mark=" + mark + "' "
-            + "--plan-upload-api='http://139.198.5.125/OwnLogistics/api/own/routes/result?mark=" + mark + "' ";
-        // C++(CC) command
-        var cmd_cc_run =  "/usr/bin/time ../../cc/vsp 1 "  // multi-process by default
-            + "'http://139.198.5.125/OwnLogistics/api/own/orders?mark=" + mark + "' "
-            + "'http://139.198.5.125/OwnLogistics/api/own/vehicles?mark=" + mark + "' "
-            + "'http://139.198.5.125/OwnLogistics/api/own/routes/result?mark=" + mark + "' ";
-        // Select a run command
-        var cmd_run = cmd_python_run;  // default using Python version
-        if (!eng && (eng[0] === 'c' || eng[0] === 'C'))
-            cmd_run = cmd_cc_run;
-        else
-            console.log("** Warning: Unknown engine version: " + eng + "! Use Python instead.");
-        var cmd =
-            "export rundir=" + uniq_rundir + "; OUTDIR=$rundir; mkdir -p $OUTDIR; cd $OUTDIR; "
-            + cmd_ln + cmd_run
-            + "> stdout.log; echo RUNDIR=$rundir ";
-    };
-    var cmd = get_engine_cmd(params["engine"]);
-    console.log(cmd);
-    var workerProcess = child_process.exec(cmd,
-        function (error, stdout, stderr) {
-            if (error) {
-                console.log(error.stack);
-                console.log('Error code: '+ error.code);
-                console.log('Signal received: '+ error.signal);
-            }
-            console.log('stdout: ' + stdout);
-            console.log('stderr: ' + stderr);
-            console.log("- Finish optimization.\n");
-            response.write("### Finish optimization.\n");
-            response.end();
-        });
+    // Ansyc run
+    var workerProcess = child_process.execFile("make",
+	["--ignore-errors", "-f", "Makefile-run", "MARK="+mark, "ENGINE="+engine],
+	function (error, stdout, stderr) {
+	    console.log('stdout: ' + stdout);
+	    console.log('stderr: ' + stderr);
+	    if (error) {
+		console.log(error.stack);
+		console.log('Error code: '+ error.code);
+		console.log('Signal received: '+ error.signal);
+		console.log("- Optimization FAILED!\n");
+		response.write("### Optimization FAILED!\n");
+	    } else {
+		console.log("- Finish optimization.\n");
+		response.write("### Finish optimization.\n");
+	    }
+	    response.end();
+	});
     // workerProcess.on('exit', function (exitCode) {
     // Ansyc postprocess
     //});
