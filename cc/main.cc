@@ -37,9 +37,9 @@ upload(const char *api)
 {
   if (!api)
     return;
-  string cmd = "curl --output curl.log --include --silent --show-error --form resultsStr=<";
+  string cmd = "curl --output curl.log --include --silent --show-error --form \"resultStr=<";
   cmd += _OUTPUT_PLAN_FILE;
-  cmd += ";type=text/plain ";
+  cmd += ";type=text/plain\" ";
   cmd += api;
   // TODO: system(cmd.c_str());
   cout << "$" << cmd << ";" << endl;
