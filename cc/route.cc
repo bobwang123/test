@@ -7,16 +7,24 @@
 using namespace std;
 
 Route::Route(Task &task, const string &name, const Cost &cost_obj)
-  : _this_task(task), _name(name), _cost(cost_obj)
+  : _this_task(task), _name(name), _cost(&cost_obj)
 {
+  // create a special cost object if needed
+  if (!_this_task.is_virtual() && !Consts::is_none(_this_task.line_expense()))
+    _cost = new Cost(_cost->distance(),
+                     _this_task.line_expense(),
+                     _cost->duration());
   _expected_end_time = _this_task.expected_start_time() 
-    + _this_task.no_run_time() + _cost.duration();
+    + _this_task.no_run_time() + _cost->duration();
   _profit = Consts::DOUBLE_NONE;
   _max_profit = Consts::DOUBLE_NONE;
 }
 
 Route::~Route()
 {
+  if (!_this_task.is_virtual() && !Consts::is_none(_this_task.line_expense()))
+    delete _cost;  // delete special cost object with a special line expense
+  _cost = 0;
   for (std::vector<Step *>::iterator it = _next_steps.begin();
        it != _next_steps.end(); ++it)
     delete *it;
@@ -129,11 +137,11 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
   cJSON_AddItemToObjectCS(route_dict, "routeKey",
                           cJSON_CreateString(_name.c_str()));
   cJSON_AddItemToObjectCS(route_dict, "distance",
-                          cJSON_CreateNumber(_cost.distance()));
+                          cJSON_CreateNumber(_cost->distance()));
   cJSON_AddItemToObjectCS(route_dict, "duration",
-                          cJSON_CreateNumber(_cost.duration()));
+                          cJSON_CreateNumber(_cost->duration()));
   cJSON_AddItemToObjectCS(route_dict, "expense",
-                          cJSON_CreateNumber(_cost.expense()));
+                          cJSON_CreateNumber(_cost->expense()));
   cJSON_AddItemToObjectCS(route_dict, "probability",
                           cJSON_CreateNumber(_this_task.prob()));
   cJSON_AddItemToObjectCS(route_dict, "waitingTime",

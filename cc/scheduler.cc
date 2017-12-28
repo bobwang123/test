@@ -140,9 +140,13 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     cJSON *order_unload_time = cJSON_GetObjectItem(json_order, "unloadingTime");
     const double unload_time = order_unload_time->type == cJSON_NULL
       ? _DEFAULT_UNLOAD_TIME: order_unload_time->valuedouble;
+    cJSON *order_line_expense = cJSON_GetObjectItem(json_order, "lineCost");
+    const double line_expense =
+      !order_line_expense || order_line_expense->type == cJSON_NULL
+      ? Consts::DOUBLE_NONE: order_line_expense->valuedouble;
     orders[i] = new OrderTask(from_loc, to_loc, expected_start_time,
                               prob, is_virtual, name, receivable,
-                              load_time, unload_time);
+                              load_time, unload_time, line_expense);
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
   const size_t num_orders = num_orig_orders -

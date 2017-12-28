@@ -58,10 +58,11 @@ OrderTask::OrderTask(const CostMatrix::CityIdxType loc_start,
                      const std::string &name,
                      const double receivable,
                      const double load_time,
-                     const double unload_time)
+                     const double unload_time,
+                     const double line_expense)
   : Task(loc_start, loc_end, start_time, occur_prob, is_virtual, name),
   _receivable(receivable), _load_time(load_time), _unload_time(unload_time),
-  _max_profit_route(0)
+  _line_expense(line_expense), _max_profit_route(0)
 {
 }
 

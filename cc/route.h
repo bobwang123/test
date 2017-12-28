@@ -12,7 +12,7 @@ class Route
 {
   Task &_this_task;  // this route belongs to _this_task
   const std::string _name;
-  const Cost &_cost;
+  const Cost *_cost;
   double _expected_end_time;
   std::vector<Step *> _next_steps;  // all next reachable steps
   double _profit;  // profit of this route
@@ -28,7 +28,7 @@ public:
   const std::string &
     name() const { return _name; }
   const double
-    expense() const { return _cost.expense(); }
+    expense() const { return _cost->expense(); }
   const double
     profit();
   std::vector<Step *> &

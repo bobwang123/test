@@ -52,6 +52,8 @@ public:
     receivable() const { return 0.0; }
   virtual const double
     wait_time() const { return 0.0; }
+  virtual const double
+    line_expense() const { return Consts::DOUBLE_NONE; }
   const bool
     is_virtual() const { return _is_virtual; }
   void
@@ -68,6 +70,7 @@ class OrderTask: public Task
   const double _receivable;  // yuan
   const double _load_time;  // hours
   const double _unload_time;  // hours
+  const double _line_expense;  // yuan
   Route *_max_profit_route;
 public:
   OrderTask(const CostMatrix::CityIdxType loc_start,
@@ -78,7 +81,8 @@ public:
             const std::string &name="",
             const double receivable=0.0,
             const double load_time=0.0,
-            const double unload_time=0.0);
+            const double unload_time=0.0,
+            const double line_expense=Consts::DOUBLE_NONE);
     ~OrderTask();
 public:
     const double
@@ -89,6 +93,8 @@ public:
       no_run_time() const { return _load_time + _unload_time; }
     const double
       receivable() const { return _receivable; }
+    const double
+      line_expense() const { return _line_expense; }
     Route *
       max_profit_route();
 };
