@@ -41,7 +41,7 @@ upload(const char *api)
   cmd += _OUTPUT_PLAN_FILE;
   cmd += ";type=text/plain\" ";
   cmd += api;
-  // TODO: system(cmd.c_str());
+  system(cmd.c_str());
   cout << "$" << cmd << ";" << endl;
 }
 
@@ -59,7 +59,7 @@ namespace
       cmd += ofname;
       cmd += " ";
       cmd += api;
-      // TODO: system(cmd.c_str());
+      system(cmd.c_str());
       cmd = "$" + cmd + ";";
       cout << cmd << endl;
     }
