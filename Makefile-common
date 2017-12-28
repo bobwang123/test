@@ -1,0 +1,7 @@
+
+COST_CACHE_FILE:=cost.http_api.json
+PROB_CACHE_FILE:=probability.http_api.json
+COST_PROB_CC_CACHE_FILE:=cost_prob.cc.json
+
+COST_API:=http://139.198.5.125/OwnLogistics/api/own/city/cost
+PROB_API:=http://139.198.5.125/OwnLogistics/api/own/city/statistics
