@@ -146,6 +146,10 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
                           cJSON_CreateNumber(_this_task.prob()));
   cJSON_AddItemToObjectCS(route_dict, "waitingTime",
                           cJSON_CreateNumber(_this_task.wait_time()));
+  cJSON_AddItemToObjectCS(route_dict, "lineCost",
+                          Consts::is_none(_this_task.line_expense())?
+                          cJSON_CreateNull():
+                          cJSON_CreateNumber(_this_task.line_expense()));
   return route_dict;
 }
 
