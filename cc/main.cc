@@ -37,12 +37,14 @@ upload(const char *api)
 {
   if (!api)
     return;
+  double t1 = get_wall_time();
   string cmd = "curl --output curl.log --include --silent --show-error --form \"resultStr=<";
   cmd += _OUTPUT_PLAN_FILE;
   cmd += ";type=text/plain\" ";
   cmd += api;
   system(cmd.c_str());
   cout << "$" << cmd << ";" << endl;
+  print_wall_time_diff(t1, "Total plans upload time");
 }
 
 namespace
@@ -86,6 +88,8 @@ namespace
  */
 int main(int argc, char *argv[])
 {
+  double tg1 = get_wall_time();
+  double t1 = get_wall_time();
   // arguement parsing
   if (argc <= 4)
   {
@@ -111,12 +115,12 @@ int main(int argc, char *argv[])
         _download(vehicle_api, _VEHICLE_FILE);
     }
   }
+  print_wall_time_diff(t1, "Total order & vehicle download time");
   const char *upload_api = !_is_empty(argv[4])? argv[4]: (const char *)0;
   if (!upload_api)
     cout << "** Warning: No plan will be uploaded due to no API." << endl;
   // start
-  double tg1 = get_wall_time();
-  double t1 = get_wall_time();
+  t1 = get_wall_time();
   // TODO: create cm and sh in child process to avoid duplicate memory usage
   // Generate this file using "$ python python/cost.py cost.json prob.json"
   CostMatrix cm(_COST_PROB_FILE);
