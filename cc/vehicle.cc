@@ -86,7 +86,7 @@ Vehicle::plans_to_dict(const CostMatrix &cost_prob_mat) const
 {
   cJSON *plans = cJSON_CreateArray();
   const size_t num_plans = _candidate_plans_sorted.size();
-  for (int i = 0; i < num_plans; ++i)
+  for (size_t i = 0; i < num_plans; ++i)
     cJSON_AddItemReferenceToArray(
       plans, _candidate_plans_sorted.at(i)->to_dict(cost_prob_mat));
   cJSON *vehicle_plans = cJSON_CreateObject();

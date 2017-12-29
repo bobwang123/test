@@ -20,7 +20,7 @@ CostMatrix::_create_cities(cJSON *json)
     _cities.push_back(json_city_name->valuestring);
   }
   if (vsp_debug)
-    for (int i = 0; i < _cities.size(); ++i)
+    for (vector<std::string>::size_type i = 0; i < _cities.size(); ++i)
       cout << _cities[i] << endl;
   return _cities;
 }
@@ -56,17 +56,17 @@ CostMatrix::_create_cost_mat(cJSON *json)
 {
   const size_t ndim = _cities.size();
   _cost_mat = new CostMapType *[ndim];
-  for (int i = 0; i < ndim; ++i)
+  for (size_t i = 0; i < ndim; ++i)
     _cost_mat[i] = new CostMapType[ndim];
   cJSON *json_2d = cJSON_GetObjectItem(json, "cost_matrix");
-  assert(ndim == cJSON_GetArraySize(json_2d));
+  assert(ndim == (size_t)cJSON_GetArraySize(json_2d));
   vsp_debug && cout << "\nCost Matrix\n" << "[" << "\n";
-  for (int i = 0; i < ndim; ++i)
+  for (size_t i = 0; i < ndim; ++i)
   {
     vsp_debug && cout << " [" << "\n";
     cJSON *json_1d = cJSON_GetArrayItem(json_2d, i);
-    assert(ndim == cJSON_GetArraySize(json_1d));
-    for (int j = 0; j < ndim; ++j)
+    assert(ndim == (size_t)cJSON_GetArraySize(json_1d));
+    for (size_t j = 0; j < ndim; ++j)
     {
       vsp_debug && cout << "  {";
       cJSON *route_cost_map = cJSON_GetArrayItem(json_1d, j);
@@ -103,7 +103,7 @@ CostMatrix::_create_prob_mat(cJSON *json)
 {
   const size_t ndim = _cities.size();
   _prob_mat = new _BaseProbArrayType *[ndim];
-  for (int i = 0; i < ndim; ++i)
+  for (size_t i = 0; i < ndim; ++i)
     _prob_mat[i] = new _BaseProbArrayType[ndim];
   cJSON *json_3d = cJSON_GetObjectItem(json, "prob_matrix");
   vsp_debug && cout << "\nProbability Matrix\n" << "[" << "\n";
@@ -153,7 +153,7 @@ CostMatrix::CostMatrix(const char *filename)
 CostMatrix::~CostMatrix()
 {
   const size_t ndim = _cities.size();
-  for (int i = 0; i < ndim; ++i)
+  for (size_t i = 0; i < ndim; ++i)
   {
     delete[] _cost_mat[i];
     delete[] _prob_mat[i];

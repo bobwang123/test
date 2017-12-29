@@ -55,12 +55,12 @@ Scheduler::~Scheduler()
 {
   double t1 = get_wall_time();
   // #pragma omp parallel for
-  for (int i = 0; i < _sorted_vehicles.size(); ++i)
+  for (vector<Vehicle *>::size_type i = 0; i < _sorted_vehicles.size(); ++i)
     delete _sorted_vehicles[i];
   print_wall_time_diff(t1, "Destruct vehicles");
   t1 = get_wall_time();
   // #pragma omp parallel for
-  for (int i = 0; i < _orders.size(); ++i)
+  for (vector<OrderTask *>::size_type i = 0; i < _orders.size(); ++i)
     delete _orders[i];
   delete[] _sorted_orders;
   _sorted_orders = 0;
@@ -77,7 +77,7 @@ Scheduler::_init_vehicles_from_json(const char *filename)
   cJSON *json_array_vehicles = cJSON_GetObjectItem(json, "data");
   _num_sorted_vehicles = cJSON_GetArraySize(json_array_vehicles);
   _sorted_vehicles.reserve(_num_sorted_vehicles);
-  for (int i = 0; i < _num_sorted_vehicles; ++i)
+  for (size_t i = 0; i < _num_sorted_vehicles; ++i)
   {
     cJSON *json_vehicle = cJSON_GetArrayItem(json_array_vehicles, i);
     const char *name =
@@ -170,7 +170,7 @@ Scheduler::_ignore_unreachable_orders_and_sort(const size_t num_orders)
 {
   double t1 = get_wall_time();
   set<OrderTask *> all_reachable_orders;
-  for (int i = 0; i < _num_sorted_vehicles; ++i)
+  for (size_t i = 0; i < _num_sorted_vehicles; ++i)
     for (vector<OrderTask *>::iterator it = _orders.begin();
          it != _orders.end(); ++it)
       if (*it && _sorted_vehicles[i]->connect(*(*it), _cost_prob))
@@ -210,7 +210,7 @@ Scheduler::_ignore_unreachable_orders_and_sort(const size_t num_orders)
   if (vsp_debug)
   {
     cout << "DEBUG - Sorted Order Expected Start Time\n";
-    for (int i = 0; i < _num_sorted_orders; ++i)
+    for (size_t i = 0; i < _num_sorted_orders; ++i)
       cout << _sorted_orders[i]->expected_start_time() << "\n";
     cout << endl;
   }
@@ -221,7 +221,7 @@ void
 Scheduler::_build_order_cost()
 {
   double t1 = get_wall_time();
-  for (int i = 0; i < _num_sorted_orders; ++i)
+  for (size_t i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *order = _sorted_orders[i];
     const CostMatrix::CostMapType &costs =
@@ -239,10 +239,10 @@ Scheduler::_build_order_dag()
   double t1 = get_wall_time();
   vector<size_t> num_edges(_num_sorted_orders, 0);
   #pragma omp parallel for
-  for (int i = 0; i < _num_sorted_orders; ++i)
+  for (size_t i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *order = _sorted_orders[i];
-    for (int j = i + 1; j < _num_sorted_orders; ++j)
+    for (size_t j = i + 1; j < _num_sorted_orders; ++j)
     {
       OrderTask *next_candidate = _sorted_orders[j];
       if (order->connect(*next_candidate, _cost_prob,
@@ -252,7 +252,7 @@ Scheduler::_build_order_dag()
   }
   size_t total_num_edges = 0;
   #pragma omp parallel for reduction(+:total_num_edges)
-  for (int i = 0; i < _num_sorted_orders; ++i)
+  for (size_t i = 0; i < _num_sorted_orders; ++i)
     total_num_edges += num_edges[i];
   cout << "Create " << total_num_edges << " edges for order DAG.\n";
   print_wall_time_diff(t1, "Create order DAG");
