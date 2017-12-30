@@ -109,7 +109,7 @@ class Route(object):
             "orderMoney": self._this_task.receivable,
             "fromCity": cost_prob_mat.city_name(self._this_task.loc_from),
             "toCity": cost_prob_mat.city_name(self._this_task.loc_to),
-            "orderedPickupTime": str(datetime.fromtimestamp(self._this_task.expected_start_time * 3600)),
+            "orderedPickupTime": self._this_task.expected_start_time * 3600e3,
             "loadingTime": self._this_task.load_time,
             "unLoadingTime": self._this_task.unload_time,
             "isVirtual": self._this_task.is_virtual,
