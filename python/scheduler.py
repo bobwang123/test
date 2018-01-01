@@ -51,9 +51,11 @@ class Scheduler(object):
                 load_time, unload_time = record["loadingTime"], record["unLoadingTime"]
                 load_time = load_time if load_time else 5.0  # default loading time
                 unload_time = unload_time if unload_time else 5.0  # default unloading time
+                line_expense = record["lineCost"]
                 large_prob_orders.append(task.OrderTask(from_loc, to_loc, expected_start_time, occur_prob=prob,
                                                         is_virtual=is_virtual, name=name, receivable=receivable,
-                                                        load_time=load_time, unload_time=unload_time))
+                                                        load_time=load_time, unload_time=unload_time,
+                                                        line_expense=line_expense))
         if not has_real:
             print("** Warning: No real orders found! There are only virtual orders.")
         orig_len, reduced_len = len(json_obj["data"]), len(large_prob_orders)

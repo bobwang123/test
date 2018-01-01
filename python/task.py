@@ -12,7 +12,8 @@ class Route(object):
         assert isinstance(cost_obj, cost.Cost)
         self._this_task = task  # this route belongs to task
         self._name = name
-        self._cost = cost_obj
+        self._cost = cost_obj if task.line_expense is None else \
+            cost.Cost(cost_obj.distance, task.line_expense, cost_obj.duration)
         self._expected_end_time = \
             self._this_task.expected_start_time + self._this_task.no_run_time + self._cost.duration
         self._next_steps = list()  # next reachable steps for sorting in future
@@ -109,7 +110,7 @@ class Route(object):
             "orderMoney": self._this_task.receivable,
             "fromCity": cost_prob_mat.city_name(self._this_task.loc_from),
             "toCity": cost_prob_mat.city_name(self._this_task.loc_to),
-            "orderedPickupTime": self._this_task.expected_start_time * 3600e3,
+            "orderedPickupTime": int(self._this_task.expected_start_time * 3600000),
             "loadingTime": self._this_task.load_time,
             "unLoadingTime": self._this_task.unload_time,
             "isVirtual": self._this_task.is_virtual,
@@ -118,7 +119,8 @@ class Route(object):
             "duration": self._cost.duration,
             "expense": self._cost.expense,
             "probability": self._this_task.prob,
-            "waitingTime": self._this_task.wait_time
+            "waitingTime": self._this_task.wait_time,
+            "lineCost": self._this_task.line_expense
         }
         return route_dict
 
@@ -174,6 +176,10 @@ class Task(object):
         return 0
 
     @property
+    def line_expense(self):
+        return None
+
+    @property
     def wait_time(self):
         return 0
 
@@ -198,12 +204,13 @@ class Task(object):
 
 class OrderTask(Task):
     def __init__(self, loc_start, loc_end, start_time, occur_prob=1.0, is_virtual=False, name=None,
-                 receivable=0.0, load_time=0.0, unload_time=0.0):
+                 receivable=0.0, load_time=0.0, unload_time=0.0, line_expense=None):
         super(OrderTask, self).__init__(loc_start, loc_end, start_time, occur_prob, is_virtual, name)
         self._receivable = receivable  # yuan
         self._load_time = load_time  # hour
         self._unload_time = unload_time  # hour
         self._max_profit_route = None
+        self._line_expense=line_expense
 
     @property
     def load_time(self):
@@ -220,6 +227,10 @@ class OrderTask(Task):
     @property
     def receivable(self):
         return self._receivable
+
+    @property
+    def line_expense(self):
+        return self._line_expense
 
     def max_profit_route(self):
         if self._max_profit_route is not None:
