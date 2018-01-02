@@ -13,7 +13,8 @@ COST_GEN:=./python/cost.py
 RAM_DISK_PATH:=/dev/shm
 
 all: $(COST_PROB_CC_CACHE_FILE)
-	mv $< $(RAM_DISK_PATH)/$< \
+	cp -p --backup=numbered $< $<.backup \
+	    && mv $< $(RAM_DISK_PATH)/$< \
 	    && ln -sf $(RAM_DISK_PATH)/$<
 
 $(COST_PROB_CC_CACHE_FILE): update-cost  update-prob
