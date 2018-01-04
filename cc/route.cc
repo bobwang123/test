@@ -126,8 +126,8 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
                             cost_prob_mat.city_name(_this_task.loc_to())
                             .c_str()));
   cJSON_AddItemToObjectCS(route_dict, "orderedPickupTime",
-                          cJSON_CreateNumber(_this_task.expected_start_time()
-                                             * 3600.0e3));
+                          cJSON_CreateNumber(round(
+                              _this_task.expected_start_time() * 3600.0e3)));
   cJSON_AddItemToObjectCS(route_dict, "loadingTime",
                           cJSON_CreateNumber(_this_task.load_time()));
   cJSON_AddItemToObjectCS(route_dict, "unLoadingTime",
