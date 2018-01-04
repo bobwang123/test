@@ -100,7 +100,7 @@ Route::update_max_profit()
        it != _next_steps.end(); ++it)
     if (Consts::is_none((*it)->max_profit()))
       (*it)->update_max_profit();
-  sort(_next_steps.begin(), _next_steps.end(), Step::reverse_cmp);
+  stable_sort(_next_steps.begin(), _next_steps.end(), Step::reverse_cmp);
   Step *max_profit_step = _next_steps.front();
   assert(max_profit_step);
   _max_profit = profit();

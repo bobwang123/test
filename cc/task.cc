@@ -80,7 +80,7 @@ OrderTask::max_profit_route()
   assert(!rs.empty());
   for (vector<Route *>::iterator it = rs.begin(); it != rs.end(); ++it)
     (*it)->update_max_profit();
-  sort(rs.begin(), rs.end(), Route::reverse_cmp);
+  stable_sort(rs.begin(), rs.end(), Route::reverse_cmp);
   _max_profit_route = rs.front();
   return _max_profit_route;
 }
