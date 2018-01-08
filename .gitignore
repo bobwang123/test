@@ -112,3 +112,11 @@ ENV/
 
 # Javacript
 node_modules/
+
+# Project
+cscope.*
+tags
+output_plans.json
+cxx_outplans.json
+python/*.c
+cc/vsp
