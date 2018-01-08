@@ -1,5 +1,6 @@
 
 import json
+import optparse
 
 
 def _order_per_hour_template():
@@ -160,6 +161,13 @@ def _order_list_gen(num_hours):
 
 
 if __name__ == "__main__":
-    output_orders = {"data": _order_list_gen(2)}
+    option_parser = optparse.OptionParser()
+    assert isinstance(option_parser, optparse.OptionParser)
+    option_parser.add_option("--hours", action="store", dest="hours",
+            type="int", default=240,
+            help="set the number of consecutive hours for the test."
+            "[default=%default]")
+    (cmd_opt, args) = option_parser.parse_args()
+    output_orders = {"data": _order_list_gen(cmd_opt.hours)}
     json_str = json.dumps(output_orders, ensure_ascii=False, indent=2)
     print(json_str)
