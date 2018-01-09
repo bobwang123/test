@@ -23,7 +23,7 @@ var get_client_ip = function(req) {
 
 var server = http.createServer(function (request, response) {
     var myDate = new Date();
-    console.log("- Time = " + myDate.toLocaleString( ))
+    console.log("- Start Time = " + myDate.toLocaleString( ))
     var params = url.parse(request.url, true).query;
     var client_ip = get_client_ip(request)
     if (!params["simulateCode"] && !params["update"]) {
@@ -61,6 +61,8 @@ var server = http.createServer(function (request, response) {
         if (!mark) {
             response.write("### DONE.\n");
             response.end();
+            var myDate = new Date();
+            console.log("- End Time = " + myDate.toLocaleString( ))
             return;
         }
     }
@@ -86,6 +88,8 @@ var server = http.createServer(function (request, response) {
 		response.write("### Finish optimization.\n");
 	    }
 	    response.end();
+	    var myDate = new Date();
+	    console.log("- End Time = " + myDate.toLocaleString( ))
 	});
     // workerProcess.on('exit', function (exitCode) {
     // Ansyc postprocess
