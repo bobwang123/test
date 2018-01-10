@@ -50,7 +50,7 @@ var server = http.createServer(function (request, response) {
             var update_stdout = child_process.execFileSync("make",
                 ["-j2", "--ignore-errors", "-f", "Makefile-update-db"])
             console.log('stdout: ' + update_stdout);
-            console.log("- Finish updating cost and probability matrix.\n");
+            console.log("- Finish updating cost and probability matrix.");
             response.write("### Finish updating cost and probability matrix.\n");
             response.write("### Not run because no simulateCode is specified.\n");
         } catch (e) {
@@ -62,7 +62,7 @@ var server = http.createServer(function (request, response) {
             response.write("### DONE.\n");
             response.end();
             var myDate = new Date();
-            console.log("- End Time = " + myDate.toLocaleString( ))
+            console.log("- End Time = " + myDate.toLocaleString( ) + "\n")
             return;
         }
     }
@@ -89,7 +89,7 @@ var server = http.createServer(function (request, response) {
 	    }
 	    response.end();
 	    var myDate = new Date();
-	    console.log("- End Time = " + myDate.toLocaleString( ))
+	    console.log("- End Time = " + myDate.toLocaleString( ) + "\n")
 	});
     // workerProcess.on('exit', function (exitCode) {
     // Ansyc postprocess
