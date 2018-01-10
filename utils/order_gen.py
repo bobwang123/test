@@ -120,7 +120,7 @@ def _order_per_hour_template():
             "lineCost": 9919.396368
         },{
             "orderId": "成都市->武汉市: ",
-            "orderMoney": 10700,
+            "orderMoney": 6000,
             "fromCity": "成都市",
             "toCity": "武汉市",
             "orderedPickupTime": None,
@@ -131,7 +131,7 @@ def _order_per_hour_template():
             "lineCost": 6323.425312
         },{
             "orderId": "武汉市->成都市: ",
-            "orderMoney": 6000,
+            "orderMoney": 10700,
             "fromCity": "武汉市",
             "toCity": "成都市",
             "orderedPickupTime": None,
