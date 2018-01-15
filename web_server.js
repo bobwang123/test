@@ -84,7 +84,7 @@ var server = http.createServer(function (request, response) {
 		console.log("- Optimization FAILED!\n");
 		response.write("### Optimization FAILED!\n");
 	    } else {
-		console.log("- Finish optimization.\n");
+		console.log("- Finish optimization.");
 		response.write("### Finish optimization.\n");
 	    }
 	    response.end();
