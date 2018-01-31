@@ -120,3 +120,4 @@ output_plans.json
 cxx_outplans.json
 python/*.c
 cc/vsp
+.DS_Store
