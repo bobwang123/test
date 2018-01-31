@@ -8,9 +8,6 @@
 #include <iostream>
 #include <omp.h>
 extern omp_lock_t writelock;
-#endif
-
-using namespace std;
 
 size_t
 Route::_num_objs = 0;
@@ -18,8 +15,11 @@ Route::_num_objs = 0;
 void
 Route::print_num_objs()
 {
-  cout << "Total number of Route objects: " << _num_objs << endl;
+  std::cout << "Total number of Route objects: " << _num_objs << std::endl;
 }
+#endif
+
+using namespace std;
 
 Route::Route(Task &task, const string &name, const Cost &cost_obj)
   : _this_task(task), _name(name), _cost(&cost_obj)

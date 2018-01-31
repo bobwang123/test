@@ -10,7 +10,9 @@
 
 class Route
 {
+#ifdef DEBUG
   static size_t _num_objs;
+#endif
   Task &_this_task;  // this route belongs to _this_task
   const std::string _name;
   const Cost *_cost;
@@ -20,7 +22,9 @@ class Route
   double _max_profit;  // max profit of all plans starting from this route
   std::list<EmptyRunTask *> _next_empty_task;  // for garbage collection
 public:
+#ifdef DEBUG
   static void print_num_objs();
+#endif
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();
   static bool

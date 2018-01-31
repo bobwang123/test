@@ -7,7 +7,6 @@
 #include <iostream>
 #include <omp.h>
 extern omp_lock_t writelock;
-#endif
 
 size_t
 Step::_num_objs = 0;
@@ -17,6 +16,7 @@ Step::print_num_objs()
 {
   std::cout << "Total number of Step objects: " << _num_objs << std::endl;
 }
+#endif
 
 Step::Step(Route &empty_run_route, OrderTask &order_task)
   :_empty_run_route(empty_run_route), _order_task(order_task),

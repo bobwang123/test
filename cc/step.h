@@ -6,12 +6,16 @@
 
 class Step
 {
+#ifdef DEBUG
   static size_t _num_objs;
+#endif
   Route &_empty_run_route;
   OrderTask &_order_task;
   double _max_profit;
 public:
+#ifdef DEBUG
   static void print_num_objs();
+#endif
   Step(Route &empty_run_route, OrderTask &order_task);
   ~Step();
   static bool

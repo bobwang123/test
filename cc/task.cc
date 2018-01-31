@@ -55,6 +55,7 @@ Task::connect(OrderTask &task,
   return connected;
 }
 
+#ifdef DEBUG
 size_t
 OrderTask::_num_objs = 0;
 
@@ -63,6 +64,7 @@ OrderTask::print_num_objs()
 {
   cout << "Total number of OrderTask objects: " << _num_objs << endl;
 }
+#endif
 
 OrderTask::OrderTask(const CostMatrix::CityIdxType loc_start,
                      const CostMatrix::CityIdxType loc_end,
@@ -104,6 +106,7 @@ OrderTask::max_profit_route()
   return _max_profit_route;
 }
 
+#ifdef DEBUG
 size_t
 EmptyRunTask::_num_objs = 0;
 
@@ -112,6 +115,7 @@ EmptyRunTask::print_num_objs()
 {
   cout << "Total number of EmptyRunTask objects: " << _num_objs << endl;
 }
+#endif
 
 EmptyRunTask::EmptyRunTask(const CostMatrix::CityIdxType loc_start,
                            const CostMatrix::CityIdxType loc_end,
