@@ -274,6 +274,10 @@ Scheduler::run()
        it != _sorted_vehicles.end(); ++it)
     (*it)->compute_max_profit();
   print_wall_time_diff(t1, "Compute max profit of vehicles");
+  Route::print_num_objs();
+  Step::print_num_objs();
+  EmptyRunTask::print_num_objs();
+  OrderTask::print_num_objs();
 }
 
 void

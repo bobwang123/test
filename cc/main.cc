@@ -4,6 +4,11 @@
 #include <iostream>
 #include <cstdlib>
 
+#ifdef DEBUG
+#include <omp.h>
+omp_lock_t writelock;
+#endif
+
 using namespace std;
 
 #ifdef DEBUG
@@ -88,6 +93,9 @@ namespace
  */
 int main(int argc, char *argv[])
 {
+#ifdef DEBUG
+  omp_init_lock(&writelock);
+#endif
   double tg1 = get_wall_time();
   double t1 = get_wall_time();
   // arguement parsing

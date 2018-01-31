@@ -4,7 +4,22 @@
 #include <algorithm>
 #include <cassert>
 
+#ifdef DEBUG
+#include <iostream>
+#include <omp.h>
+extern omp_lock_t writelock;
+#endif
+
 using namespace std;
+
+size_t
+Route::_num_objs = 0;
+
+void
+Route::print_num_objs()
+{
+  cout << "Total number of Route objects: " << _num_objs << endl;
+}
 
 Route::Route(Task &task, const string &name, const Cost &cost_obj)
   : _this_task(task), _name(name), _cost(&cost_obj)
@@ -18,6 +33,11 @@ Route::Route(Task &task, const string &name, const Cost &cost_obj)
     + _this_task.no_run_time() + _cost->duration();
   _profit = Consts::DOUBLE_NONE;
   _max_profit = Consts::DOUBLE_NONE;
+#ifdef DEBUG
+  omp_set_lock(&writelock);
+  ++_num_objs;
+  omp_unset_lock(&writelock);
+#endif
 }
 
 Route::~Route()

@@ -4,6 +4,12 @@
 #include <algorithm>
 #include <cassert>
 
+#ifdef DEBUG
+#include <iostream>
+#include <omp.h>
+extern omp_lock_t writelock;
+#endif
+
 using namespace std;
 
 Task::Task(const CostMatrix::CityIdxType loc_start,
@@ -49,6 +55,14 @@ Task::connect(OrderTask &task,
   return connected;
 }
 
+size_t
+OrderTask::_num_objs = 0;
+
+void
+OrderTask::print_num_objs()
+{
+  cout << "Total number of OrderTask objects: " << _num_objs << endl;
+}
 
 OrderTask::OrderTask(const CostMatrix::CityIdxType loc_start,
                      const CostMatrix::CityIdxType loc_end,
@@ -64,6 +78,11 @@ OrderTask::OrderTask(const CostMatrix::CityIdxType loc_start,
   _receivable(receivable), _load_time(load_time), _unload_time(unload_time),
   _line_expense(line_expense), _max_profit_route(0)
 {
+#ifdef DEBUG
+  omp_set_lock(&writelock);
+  ++_num_objs;
+  omp_unset_lock(&writelock);
+#endif
 }
 
 OrderTask::~OrderTask()
@@ -85,6 +104,15 @@ OrderTask::max_profit_route()
   return _max_profit_route;
 }
 
+size_t
+EmptyRunTask::_num_objs = 0;
+
+void
+EmptyRunTask::print_num_objs()
+{
+  cout << "Total number of EmptyRunTask objects: " << _num_objs << endl;
+}
+
 EmptyRunTask::EmptyRunTask(const CostMatrix::CityIdxType loc_start,
                            const CostMatrix::CityIdxType loc_end,
                            const double start_time,
@@ -95,6 +123,11 @@ EmptyRunTask::EmptyRunTask(const CostMatrix::CityIdxType loc_start,
   : Task(loc_start, loc_end, start_time, occur_prob, is_virtual, name),
   _wait_time(wait_time)
 {
+#ifdef DEBUG
+  omp_set_lock(&writelock);
+  ++_num_objs;
+  omp_unset_lock(&writelock);
+#endif
 }
 
 EmptyRunTask::~EmptyRunTask()

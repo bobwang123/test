@@ -67,12 +67,14 @@ public:
 
 class OrderTask: public Task
 {
+  static size_t _num_objs;
   const double _receivable;  // yuan
   const double _load_time;  // hours
   const double _unload_time;  // hours
   const double _line_expense;  // yuan
   Route *_max_profit_route;
 public:
+  static void print_num_objs();
   OrderTask(const CostMatrix::CityIdxType loc_start,
             const CostMatrix::CityIdxType loc_end,
             const double start_time,
@@ -101,8 +103,10 @@ public:
 
 class EmptyRunTask: public Task
 {
+  static size_t _num_objs;
   const double _wait_time;
 public:
+  static void print_num_objs();
   EmptyRunTask(const CostMatrix::CityIdxType loc_start,
                const CostMatrix::CityIdxType loc_end,
                const double start_time,
