@@ -25,8 +25,8 @@
 }
 [{
 		"precision":	"zip",
-		"Latitude":	3.776680000e+01,
-		"Longitude":	-1.223959000e+02,
+		"Latitude":	37.766800,
+		"Longitude":	-122.395900,
 		"Address":	"",
 		"City":	"SAN FRANCISCO",
 		"State":	"CA",
@@ -34,8 +34,8 @@
 		"Country":	"US"
 	}, {
 		"precision":	"zip",
-		"Latitude":	3.737199100e+01,
-		"Longitude":	-1.220260200e+02,
+		"Latitude":	37.371991,
+		"Longitude":	-122.026020,
 		"Address":	"",
 		"City":	"SUNNYVALE",
 		"State":	"CA",
@@ -285,8 +285,8 @@
 }
 [{
 		"precision":	"zip",
-		"Latitude":	3.776680000e+01,
-		"Longitude":	-1.223959000e+02,
+		"Latitude":	37.766800,
+		"Longitude":	-122.395900,
 		"Address":	"",
 		"City":	"SAN FRANCISCO",
 		"State":	"CA",
@@ -294,8 +294,8 @@
 		"Country":	"US"
 	}, {
 		"precision":	"zip",
-		"Latitude":	3.737199100e+01,
-		"Longitude":	-1.220260000e+02,
+		"Latitude":	37.371991,
+		"Longitude":	-122.026000,
 		"Address":	"",
 		"City":	"SUNNYVALE",
 		"State":	"CA",
