@@ -6,9 +6,11 @@
 class OrderTask;
 class Vehicle;
 class CostMatrix;
+struct _SchedulerMemBuf;
 
 class Scheduler
 {
+  _SchedulerMemBuf *_mb;
   std::vector<Vehicle *>_sorted_vehicles;  // sorted by avl_time
   std::size_t _num_sorted_vehicles;
   std::vector<OrderTask *>_orders;  // all orders

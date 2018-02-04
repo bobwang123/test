@@ -2,9 +2,11 @@
 #include "route.h"
 #include "cost.h"
 #include "task.h"
+#include "step.h"
 #include "vehicle.h"
 #include "fileio.h"
 #include "timer.h"
+#include "membuf.h"
 #include <set>
 #include <algorithm>
 #include <fstream>
@@ -15,6 +17,13 @@
 using namespace std;
 
 extern const int vsp_debug;
+
+struct _SchedulerMemBuf
+{
+  MemBuf<Route> *route;
+  MemBuf<Step> *step;
+  MemBuf<EmptyRunTask> *empty_run_task;
+};
 
 namespace
 {
@@ -45,7 +54,8 @@ Scheduler::_DEFAULT_MAX_MAX_EMPTY_DIST = 500;
 Scheduler::Scheduler(const char *vehicle_file,
                      const char *order_file,
                      const CostMatrix &cst_prb)
-  : _num_sorted_vehicles(0), _num_sorted_orders(0), _cost_prob(cst_prb)
+  : _mb(new _SchedulerMemBuf), _num_sorted_vehicles(0), _num_sorted_orders(0),
+  _cost_prob(cst_prb)
 {
   if (!_init_vehicles_from_json(vehicle_file))
     _init_order_tasks_from_json(order_file);
@@ -65,6 +75,10 @@ Scheduler::~Scheduler()
   delete[] _sorted_orders;
   _sorted_orders = 0;
   print_wall_time_diff(t1, "Destruct OrderTasks");
+  t1 = get_wall_time();
+  delete _mb;
+  _mb = 0;
+  print_wall_time_diff(t1, "Destruct MemBufs");
 }
 
 int
