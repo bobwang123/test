@@ -34,9 +34,10 @@ struct _SchedulerMemBuf
     empty_run_task(num_threads),
     order_task(num_threads)
   {
-    // This size must be enough in theoretically
-    const size_t init_buf_size_th = (2*num_orders - 2 - num_orders/num_threads)
-      * (num_orders/num_threads - 1) / 2;
+    const size_t num_orders_per_thread = num_orders / num_threads;
+    // This size must be enough theoretically
+    const size_t init_buf_size_th = (2*num_orders - 2 - num_orders_per_thread)
+      * (num_orders_per_thread - 1) / 2;
     // Usually the memory requirement is no greater than 1/10 of theory.
     // Choose 1/8
     const size_t shrink_factor = 8;
@@ -47,7 +48,7 @@ struct _SchedulerMemBuf
       route[i] = new MemBuf<Route>(init_buf_size_eff);
       step[i] = new MemBuf<Step>(init_buf_size_eff);
       empty_run_task[i] = new MemBuf<EmptyRunTask>(init_buf_size_eff);
-      order_task[i] = new MemBuf<OrderTask>(num_orders);
+      order_task[i] = new MemBuf<OrderTask>(num_orders_per_thread);
     }
   }
   ~_SchedulerMemBuf()
@@ -161,6 +162,8 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   const int num_orig_orders = cJSON_GetArraySize(json_array_orders);
   vector<OrderTask *> orders(num_orig_orders, static_cast<OrderTask*>(0));
   _mb = new _SchedulerMemBuf(num_orig_orders);
+  print_wall_time_diff(t1, "Create Scheduler MemBuf");
+  t1 = get_wall_time();
   #pragma omp parallel for
   for (int i = 0; i < num_orig_orders; ++i)
   {
