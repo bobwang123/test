@@ -7,7 +7,9 @@
 #include "fileio.h"
 #include "timer.h"
 #include "membuf.h"
+#include <omp.h>
 #include <set>
+#include <vector>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -20,9 +22,44 @@ extern const int vsp_debug;
 
 struct _SchedulerMemBuf
 {
-  MemBuf<Route> *route;
-  MemBuf<Step> *step;
-  MemBuf<EmptyRunTask> *empty_run_task;
+  const size_t num_threads;
+  vector<MemBuf<Route> *> route;
+  vector<MemBuf<Step> *> step;
+  vector<MemBuf<EmptyRunTask> *> empty_run_task;
+  vector<MemBuf<OrderTask> *> order_task;
+  _SchedulerMemBuf(const size_t num_orders):
+    num_threads(omp_get_max_threads()),
+    route(num_threads),
+    step(num_threads),
+    empty_run_task(num_threads),
+    order_task(num_threads)
+  {
+    // This size must be enough in theoretically
+    const size_t init_buf_size_th = (2*num_orders - 2 - num_orders/num_threads)
+      * (num_orders/num_threads - 1) / 2;
+    // Usually the memory requirement is no greater than 1/10 of theory.
+    // Choose 1/8
+    const size_t shrink_factor = 8;
+    // Effective init size
+    const size_t init_buf_size_eff = init_buf_size_th / shrink_factor;
+    for (size_t i = 0; i < num_threads; ++i)
+    {
+      route[i] = new MemBuf<Route>(init_buf_size_eff);
+      step[i] = new MemBuf<Step>(init_buf_size_eff);
+      empty_run_task[i] = new MemBuf<EmptyRunTask>(init_buf_size_eff);
+      order_task[i] = new MemBuf<OrderTask>(num_orders);
+    }
+  }
+  ~_SchedulerMemBuf()
+  {
+    for (size_t i = 0; i < num_threads; ++i)
+    {
+      delete route[i];
+      delete step[i];
+      delete empty_run_task[i];
+      delete order_task[i];
+    }
+  }
 };
 
 namespace
@@ -54,7 +91,7 @@ Scheduler::_DEFAULT_MAX_MAX_EMPTY_DIST = 500;
 Scheduler::Scheduler(const char *vehicle_file,
                      const char *order_file,
                      const CostMatrix &cst_prb)
-  : _mb(new _SchedulerMemBuf), _num_sorted_vehicles(0), _num_sorted_orders(0),
+  : _mb(0), _num_sorted_vehicles(0), _num_sorted_orders(0),
   _cost_prob(cst_prb)
 {
   if (!_init_vehicles_from_json(vehicle_file))
@@ -123,6 +160,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   cJSON *json_array_orders = cJSON_GetObjectItem(json, "data");
   const int num_orig_orders = cJSON_GetArraySize(json_array_orders);
   vector<OrderTask *> orders(num_orig_orders, static_cast<OrderTask*>(0));
+  _mb = new _SchedulerMemBuf(num_orig_orders);
   #pragma omp parallel for
   for (int i = 0; i < num_orig_orders; ++i)
   {
