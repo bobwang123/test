@@ -21,7 +21,9 @@ public:
   {
     _buf.push_back(new char[_obj_size * _capacity]);
     _cursor = _buf.back();
-    std::cout << "construct MemBuf" << std::endl;
+#ifdef DEBUG
+    std::cout << "DEBUG - Construct MemBuf " << this << std::endl;
+#endif
   }
   ~MemBuf()
   {
@@ -29,7 +31,9 @@ public:
       delete [](*it);
     _capacity = 0;
     _size = 0;
-    std::cout << "destruct MemBuf" << std::endl;
+#ifdef DEBUG
+    std::cout << "DEBUG - Destruct MemBuf " << this << std::endl;
+#endif
   }
 public:
   // allocate memory for one object: placement new
