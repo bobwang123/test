@@ -65,9 +65,9 @@ Scheduler::~Scheduler()
   print_wall_time_diff(t1, "Destruct vehicles");
   t1 = get_wall_time();
   // #pragma omp parallel for
-  for (vector<OrderTask *>::size_type i = 0; i < _orders.size(); ++i)
-    if (_orders[i])
-      _orders[i]->~OrderTask();
+  // for (vector<OrderTask *>::size_type i = 0; i < _orders.size(); ++i)
+  //   if (_orders[i])
+  //     _orders[i]->~OrderTask();
   delete[] _sorted_orders;
   _sorted_orders = 0;
   print_wall_time_diff(t1, "Destruct OrderTasks");
