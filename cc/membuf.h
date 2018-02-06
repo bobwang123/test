@@ -1,6 +1,10 @@
 #ifndef __MEMBUF_H__
 #define __MEMBUF_H__
 
+#include "route.h"
+#include "task.h"
+#include "step.h"
+#include <omp.h>
 #include <iostream>
 #include <vector>
 
@@ -54,6 +58,51 @@ public:
     }
     _cursor += _obj_size;
     return old_cursor;
+  }
+};
+
+class SchedulerMemBuf
+{
+public:
+  const size_t num_threads;
+  std::vector<MemBuf<Route> *> route;
+  std::vector<MemBuf<Step> *> step;
+  std::vector<MemBuf<EmptyRunTask> *> empty_run_task;
+  std::vector<MemBuf<OrderTask> *> order_task;
+public:
+  SchedulerMemBuf(const size_t num_orders):
+    num_threads(omp_get_max_threads()),
+    route(num_threads),
+    step(num_threads),
+    empty_run_task(num_threads),
+    order_task(num_threads)
+  {
+    const size_t num_orders_per_thread = num_orders / num_threads;
+    // This size must be enough theoretically
+    const size_t init_buf_size_th = (2*num_orders - 2 - num_orders_per_thread)
+      * (num_orders_per_thread - 1) / 2;
+    // Usually the memory requirement is no greater than 1/10 of theory.
+    // Choose 1/8
+    const size_t shrink_factor = 8;
+    // Effective init size
+    const size_t init_buf_size_eff = init_buf_size_th / shrink_factor;
+    for (size_t i = 0; i < num_threads; ++i)
+    {
+      route[i] = new MemBuf<Route>(init_buf_size_eff);
+      step[i] = new MemBuf<Step>(init_buf_size_eff);
+      empty_run_task[i] = new MemBuf<EmptyRunTask>(init_buf_size_eff);
+      order_task[i] = new MemBuf<OrderTask>(num_orders_per_thread);
+    }
+  }
+  ~SchedulerMemBuf()
+  {
+    for (size_t i = 0; i < num_threads; ++i)
+    {
+      delete route[i];
+      delete step[i];
+      delete empty_run_task[i];
+      delete order_task[i];
+    }
   }
 };
 

@@ -20,51 +20,6 @@ using namespace std;
 
 extern const int vsp_debug;
 
-struct SchedulerMemBuf
-{
-public:
-  const size_t num_threads;
-  vector<MemBuf<Route> *> route;
-  vector<MemBuf<Step> *> step;
-  vector<MemBuf<EmptyRunTask> *> empty_run_task;
-  vector<MemBuf<OrderTask> *> order_task;
-public:
-  SchedulerMemBuf(const size_t num_orders):
-    num_threads(omp_get_max_threads()),
-    route(num_threads),
-    step(num_threads),
-    empty_run_task(num_threads),
-    order_task(num_threads)
-  {
-    const size_t num_orders_per_thread = num_orders / num_threads;
-    // This size must be enough theoretically
-    const size_t init_buf_size_th = (2*num_orders - 2 - num_orders_per_thread)
-      * (num_orders_per_thread - 1) / 2;
-    // Usually the memory requirement is no greater than 1/10 of theory.
-    // Choose 1/8
-    const size_t shrink_factor = 8;
-    // Effective init size
-    const size_t init_buf_size_eff = init_buf_size_th / shrink_factor;
-    for (size_t i = 0; i < num_threads; ++i)
-    {
-      route[i] = new MemBuf<Route>(init_buf_size_eff);
-      step[i] = new MemBuf<Step>(init_buf_size_eff);
-      empty_run_task[i] = new MemBuf<EmptyRunTask>(init_buf_size_eff);
-      order_task[i] = new MemBuf<OrderTask>(num_orders_per_thread);
-    }
-  }
-  ~SchedulerMemBuf()
-  {
-    for (size_t i = 0; i < num_threads; ++i)
-    {
-      delete route[i];
-      delete step[i];
-      delete empty_run_task[i];
-      delete order_task[i];
-    }
-  }
-};
-
 namespace
 {
   // convert milliseconds to hours since 1970-1-1 00:00:00

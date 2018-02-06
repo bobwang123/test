@@ -6,7 +6,7 @@
 class OrderTask;
 class Vehicle;
 class CostMatrix;
-struct SchedulerMemBuf;
+class SchedulerMemBuf;
 
 class Scheduler
 {
