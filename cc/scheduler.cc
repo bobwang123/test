@@ -20,14 +20,16 @@ using namespace std;
 
 extern const int vsp_debug;
 
-struct _SchedulerMemBuf
+struct SchedulerMemBuf
 {
+public:
   const size_t num_threads;
   vector<MemBuf<Route> *> route;
   vector<MemBuf<Step> *> step;
   vector<MemBuf<EmptyRunTask> *> empty_run_task;
   vector<MemBuf<OrderTask> *> order_task;
-  _SchedulerMemBuf(const size_t num_orders):
+public:
+  SchedulerMemBuf(const size_t num_orders):
     num_threads(omp_get_max_threads()),
     route(num_threads),
     step(num_threads),
@@ -51,7 +53,7 @@ struct _SchedulerMemBuf
       order_task[i] = new MemBuf<OrderTask>(num_orders_per_thread);
     }
   }
-  ~_SchedulerMemBuf()
+  ~SchedulerMemBuf()
   {
     for (size_t i = 0; i < num_threads; ++i)
     {
@@ -109,7 +111,8 @@ Scheduler::~Scheduler()
   t1 = get_wall_time();
   // #pragma omp parallel for
   for (vector<OrderTask *>::size_type i = 0; i < _orders.size(); ++i)
-    delete _orders[i];
+    if (_orders[i])
+      _orders[i]->~OrderTask();
   delete[] _sorted_orders;
   _sorted_orders = 0;
   print_wall_time_diff(t1, "Destruct OrderTasks");
@@ -161,7 +164,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   cJSON *json_array_orders = cJSON_GetObjectItem(json, "data");
   const int num_orig_orders = cJSON_GetArraySize(json_array_orders);
   vector<OrderTask *> orders(num_orig_orders, static_cast<OrderTask*>(0));
-  _mb = new _SchedulerMemBuf(num_orig_orders);
+  _mb = new SchedulerMemBuf(num_orig_orders);
   print_wall_time_diff(t1, "Create Scheduler MemBuf");
   t1 = get_wall_time();
   #pragma omp parallel for
@@ -199,9 +202,10 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     const double line_expense =
       !order_line_expense || order_line_expense->type == cJSON_NULL
       ? Consts::DOUBLE_NONE: order_line_expense->valuedouble;
-    orders[i] = new OrderTask(from_loc, to_loc, expected_start_time,
-                              prob, is_virtual, name, receivable,
-                              load_time, unload_time, line_expense);
+    const int thread_id = omp_get_thread_num();
+    orders[i] = new (_mb->order_task[thread_id]->allocate())
+      OrderTask(from_loc, to_loc, expected_start_time, prob, is_virtual,
+                name, receivable, load_time, unload_time, line_expense);
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
   const size_t num_orders = num_orig_orders -
