@@ -259,7 +259,7 @@ Scheduler::_build_order_dag()
     for (size_t j = i + 1; j < _num_sorted_orders; ++j)
     {
       OrderTask *next_candidate = _sorted_orders[j];
-      if (order->connect(*next_candidate, _cost_prob,
+      if (order->connect(*next_candidate, _cost_prob, _mb, omp_get_thread_num(),
                          _DEFAULT_MAX_WAIT_TIME, _DEFAULT_MAX_MAX_EMPTY_DIST))
         ++num_edges[i];
     }

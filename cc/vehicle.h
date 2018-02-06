@@ -9,6 +9,7 @@ class Route;
 class Task;
 class OrderTask;
 class Plan;
+class SchedulerMemBuf;
 
 class Vehicle
 {
@@ -36,6 +37,8 @@ public:
   bool
     connect(OrderTask &task,
             const CostMatrix &cost_prob_mat,
+            SchedulerMemBuf *smb = 0,
+            const size_t thread_id = 0,
             const double max_wait_time=Consts::DOUBLE_INF,
             const double max_empty_run_distance=Consts::DOUBLE_INF);
   void

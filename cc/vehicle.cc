@@ -37,11 +37,15 @@ Vehicle::~Vehicle()
 bool
 Vehicle::connect(OrderTask &task,
                  const CostMatrix &cost_prob_mat,
+                 SchedulerMemBuf *smb,
+                 const size_t thread_id,
                  const double max_wait_time,
                  const double max_empty_run_distance)
 {
   return _start_route->connect(task,
                                cost_prob_mat,
+                               smb,
+                               thread_id,
                                max_wait_time,
                                max_empty_run_distance);
 }

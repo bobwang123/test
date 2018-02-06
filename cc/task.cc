@@ -42,6 +42,8 @@ Task::~Task()
 const bool
 Task::connect(OrderTask &task,
               const CostMatrix &cost_prob_mat,
+              SchedulerMemBuf *smb,
+              const size_t thread_id,
               const double max_wait_time,
               const double max_empty_run_distance)
 {
@@ -50,8 +52,8 @@ Task::connect(OrderTask &task,
   bool connected = false;
   for (std::vector<Route *>::iterator it = _routes.begin();
        it != _routes.end(); ++it)
-    connected = (*it)->connect(
-      task, cost_prob_mat, max_wait_time, max_empty_run_distance);
+    connected = (*it)->connect(task, cost_prob_mat, smb, thread_id,
+                               max_wait_time, max_empty_run_distance);
   return connected;
 }
 

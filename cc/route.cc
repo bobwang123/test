@@ -1,6 +1,7 @@
 #include "route.h"
 #include "task.h"
 #include "consts.h"
+#include "membuf.h"
 #include <algorithm>
 #include <cassert>
 
@@ -68,6 +69,8 @@ Route::profit()
 const bool
 Route::connect(OrderTask &task,
                const CostMatrix &cost_prob_mat,
+               SchedulerMemBuf *smb,
+               const size_t thread_id,
                const double max_wait_time,
                const double max_empty_run_distance)
 {
@@ -91,13 +94,22 @@ Route::connect(OrderTask &task,
       continue;
     // create an EmptyRunTask object if task can be connected via this route
     const double empty_run_start_time = expected_end_time() + wait_time;
-    EmptyRunTask *empty_run =
-      new EmptyRunTask(_this_task.loc_to(), task.loc_from(),
-                       empty_run_start_time, task.prob(),
-                       task.is_virtual(), "", wait_time);  // with no name
-    Route *empty_run_route = new Route(*empty_run, cit->first, c);
+    EmptyRunTask *empty_run = smb ?
+      new (smb->empty_run_task[thread_id]->allocate())
+      EmptyRunTask(_this_task.loc_to(), task.loc_from(),
+                   empty_run_start_time, task.prob(),
+                   task.is_virtual(), "", wait_time):
+      new
+      EmptyRunTask(_this_task.loc_to(), task.loc_from(),
+                   empty_run_start_time, task.prob(),
+                   task.is_virtual(), "", wait_time);
+    Route *empty_run_route = smb ?
+      new (smb->route[thread_id]->allocate()) Route(*empty_run, cit->first, c):
+      new Route(*empty_run, cit->first, c);
     empty_run->add_route(empty_run_route);
-    Step *candidate_step = new Step(*empty_run_route, task);
+    Step *candidate_step = smb ?
+      new (smb->step[thread_id]->allocate()) Step(*empty_run_route, task):
+      new Step(*empty_run_route, task);
     add_next_step(candidate_step);
     connected = true;
     // record for later garbage collection
