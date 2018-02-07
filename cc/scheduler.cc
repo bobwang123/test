@@ -252,7 +252,7 @@ Scheduler::_build_order_dag()
 {
   double t1 = get_wall_time();
   vector<size_t> num_edges(_num_sorted_orders, 0);
-  #pragma omp parallel for
+  #pragma omp parallel for schedule(dynamic)
   for (size_t i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *order = _sorted_orders[i];
