@@ -141,6 +141,12 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
         << to_city->valuestring << endl;
     const double prob =
       is_virtual? _cost_prob.prob(from_loc, to_loc, expected_start_time): 1.0;
+    vsp_debug && cout << "~~ from_city->valuestring = " << from_city->valuestring
+      << " to_city->valuestring = " << to_city->valuestring
+      << " pickup_time->valuedouble = " << pickup_time->valuedouble
+      << " expected_start_time = " << expected_start_time
+      << " prob = " << prob
+      << endl;
     if (is_virtual && prob < _PROB_TH)
       continue;  // drop this virtual order due to too small probability
     cJSON *order_id = cJSON_GetObjectItem(json_order, "orderId");
@@ -161,6 +167,12 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
     orders[i] = new (_mb->order_task[thread_id]->allocate())
       OrderTask(from_loc, to_loc, expected_start_time, prob, is_virtual,
                 name, receivable, load_time, unload_time, line_expense);
+    vsp_debug && cout << "~~ from_loc = " << from_loc
+      << " to_loc = " << to_loc
+      << " pickup_time->valuedouble = " << pickup_time->valuedouble
+      << " expected_start_time = " << expected_start_time
+      << " prob = " << prob
+      << endl;
   }
   cJSON_Delete(json);  // TODO: keep the json and reuse its const strings
   const size_t num_orders = num_orig_orders -
