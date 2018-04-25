@@ -37,6 +37,7 @@ class CostMatrix(object):
         t1 = timeit.default_timer()
         self._cities, self._city_indices, self._cost_mat = CostMatrix._parse_cost_json_file(cost_file)
         self._num_prob_ticks = 24  # each hour each distribution per day
+        self._time_zone = +8
         self._prob_mat = self._parse_prob_json_file(probability_file)
         t2 = timeit.default_timer()
         print("Wall - Init cost matrix: %.2f seconds" % (t2 - t1))
@@ -78,15 +79,18 @@ class CostMatrix(object):
                 to_loc_idx = self.city_idx(norm_dist["toCity"])
                 if from_loc_idx is None or to_loc_idx is None:
                     continue
-                hour = int(norm_dist["timeHour"])
-                assert 0 <= hour <= self._num_prob_ticks - 1
+                hour_offset = 6  # order occurring time and pickup time difference
+                occur_hour = int(norm_dist["timeHour"])
+                assert 0 <= occur_hour <= self._num_prob_ticks - 1
+                pickup_hour = (occur_hour + hour_offset) % self._num_prob_ticks
+                assert 0 <= pickup_hour <= self._num_prob_ticks - 1
                 mean = norm_dist["avgCount"]
                 std = norm_dist["std"]
                 x = 1  # number of orders appearing at this time. TODO: could be a config option?
-                px = norm.cdf(x, mean, std) if mean > 0.0 and std > 0.0 else 0.0
+                px = (1 - norm.cdf(x, mean, std)) if mean > 0.0 and std > 0.0 else 0.0
                 # print("P(x)=%f, x=%f, mean=%f, std=%f" % (px, x, mean, std))
                 assert 0.0 <= px <= 1.0
-                prob_mat[from_loc_idx][to_loc_idx][hour] = px
+                prob_mat[from_loc_idx][to_loc_idx][pickup_hour] = px
         return tuple([tuple([tuple(to_data) for to_data in from_data]) for from_data in prob_mat])
 
     def city_idx(self, name):
@@ -97,7 +101,7 @@ class CostMatrix(object):
 
     def prob(self, start_loc, end_loc, time_in_hour):
         assert time_in_hour >= 0
-        return self._prob_mat[start_loc][end_loc][int(time_in_hour % self._num_prob_ticks)]
+        return self._prob_mat[start_loc][end_loc][int(time_in_hour + self._time_zone) % self._num_prob_ticks]
 
     def costs(self, start_loc, end_loc):
         return self._cost_mat[start_loc][end_loc]
