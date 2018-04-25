@@ -120,9 +120,16 @@ CostMatrix::_create_prob_mat(cJSON *json)
         cerr << "** Error: hour ticks mismatch!" << endl;
         exit(-1);
       }
-      for (int k = 0; k < cJSON_GetArraySize(json_1d); ++k)
+      const int nhours = cJSON_GetArraySize(json_1d);
+      const int hour_offset = 6;  // order occurring time and pickup time difference
+      // cout << "## nhours = " << nhours << endl;
+      for (int k = 0; k < nhours; ++k)
       {
-        _prob_mat[i][j][k] = cJSON_GetArrayItem(json_1d, k)->valuedouble;
+        const int occur_time = (nhours + k - hour_offset) % nhours;
+        _prob_mat[i][j][k] = 1 - cJSON_GetArrayItem(json_1d, occur_time)->valuedouble; // fixed time
+        // cout << "## pickup time = " << k
+        //   << " ## occur time = " << occur_time
+        //   << " ## prob = " << _prob_mat[i][j][k] << endl;
         vsp_debug && cout << _prob_mat[i][j][k] << ", ";
       }
       vsp_debug && cout << "]," << "\n";
