@@ -49,8 +49,8 @@ class Scheduler(object):
                 name = record["orderId"]
                 receivable = record["orderMoney"]
                 load_time, unload_time = record["loadingTime"], record["unLoadingTime"]
-                load_time = load_time if load_time else 5.0  # default loading time
-                unload_time = unload_time if unload_time else 5.0  # default unloading time
+                load_time = load_time if load_time is not None else 0.0  # default loading time
+                unload_time = unload_time if unload_time is not None else 0.0  # default unloading time
                 line_expense = record["lineCost"] if "lineCost" in record else None
                 large_prob_orders.append(task.OrderTask(from_loc, to_loc, expected_start_time, occur_prob=prob,
                                                         is_virtual=is_virtual, name=name, receivable=receivable,
