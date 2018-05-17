@@ -40,6 +40,8 @@ compute(Scheduler *sh)
 void
 upload(const char *api)
 {
+  /* disable C++ upload with curl due to Qingyun system(curl) unknown issues */
+  return;
   if (!api)
     return;
   double t1 = get_wall_time();

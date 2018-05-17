@@ -10,6 +10,12 @@ TIME_STAMP:=$(shell date +%s)
 RANDOM_INT:=$(shell echo $$RANDOM)
 UNIQ_RUN_DIR:=run_$(MARK)/$(TIME_STAMP)_$(RANDOM_INT)
 
+CXX_OUTPUT:=cxx_outplans.json
+CXX_UPLOAD_CMD:=true
+ifeq ($(ENGINE),C++)
+    CXX_UPLOAD_CMD:=curl --output curl.log --include --silent --show-error --form "resultStr=<$(CXX_OUTPUT);type=text/plain" $(UPLOAD_API)?mark=$(MARK)
+endif
+
 # select optimization engine
 ifeq ($(ENGINE),C++)
     CMD_RUN:= /usr/bin/time env OMP_NUM_THREADS=6 ../../cc/vsp 0 \
@@ -31,7 +37,8 @@ all:
 	    && ln -sf ../../$(COST_CACHE_FILE) \
 	    && ln -sf ../../$(PROB_CACHE_FILE) \
 	    && ln -sf ../../$(COST_PROB_CC_CACHE_FILE) \
-	    && $(CMD_RUN) >& run.log
+	    && $(CMD_RUN) >& run.log \
+	    && $(CXX_UPLOAD_CMD)
 
 .PHONY: clean distclean
 clean-cmd:=$(RM)
