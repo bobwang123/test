@@ -87,11 +87,13 @@ class CostMatrix(object):
                 mean = norm_dist["avgCount"]
                 std = norm_dist["std"]
                 x = 1  # number of orders appearing at this time. TODO: could be a config option?
-                px = (1 - norm.cdf(x, mean, std)) if mean > 0.0 and std > 0.0 else 0.0
-                # print("P(x)=%f, x=%f, mean=%f, std=%f" % (px, x, mean, std))
-                assert 0.0 <= px <= 1.0
-                prob_mat[from_loc_idx][to_loc_idx][pickup_hour] = px
-        return tuple([tuple([tuple(to_data) for to_data in from_data]) for from_data in prob_mat])
+                # pcx is the probability that an order does NOT exist
+                pcx = norm.cdf(x, mean, std) if mean > 0.0 and std > 0.0 else 1.0
+                # print("Pc(x)=%f, x=%f, mean=%f, std=%f" % (pcx, x, mean, std))
+                assert 0.0 <= pcx <= 1.0
+                prob_mat[from_loc_idx][to_loc_idx][pickup_hour] *= pcx
+        # Notice: prob = 1 - pc
+        return tuple([tuple([tuple([1 - pc for pc in to_data]) for to_data in from_data]) for from_data in prob_mat])
 
     def city_idx(self, name):
         return self._city_indices[name] if name in self._city_indices else None
