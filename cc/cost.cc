@@ -121,15 +121,12 @@ CostMatrix::_create_prob_mat(cJSON *json)
         exit(-1);
       }
       const int nhours = cJSON_GetArraySize(json_1d);
-      const int hour_offset = 6;  // order occurring time and pickup time difference
       // cout << "## nhours = " << nhours << endl;
       for (int k = 0; k < nhours; ++k)
       {
-        const int occur_time = (nhours + k - hour_offset) % nhours;
-        _prob_mat[i][j][k] = 1 - cJSON_GetArrayItem(json_1d, occur_time)->valuedouble; // fixed time
-        // cout << "## pickup time = " << k
-        //   << " ## occur time = " << occur_time
-        //   << " ## prob = " << _prob_mat[i][j][k] << endl;
+        // input prob and pickup hour ticks mapping should be adjusted
+        // in Python program cost.py
+        _prob_mat[i][j][k] = cJSON_GetArrayItem(json_1d, k)->valuedouble;
         vsp_debug && cout << _prob_mat[i][j][k] << ", ";
       }
       vsp_debug && cout << "]," << "\n";
