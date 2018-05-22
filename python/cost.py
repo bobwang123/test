@@ -68,7 +68,7 @@ class CostMatrix(object):
         cost_mat = tuple([tuple(r) for r in cost_mat])  # list(list()) to tuple(tuple())
         return cities, city_indices, cost_mat
 
-    def _parse_prob_json_file(self, prob_file, default_prob=1.0):
+    def _parse_prob_json_file(self, prob_file):
         prob_mat = numpy.ones((len(self._city_indices), len(self._city_indices), self._num_prob_ticks))
         if not prob_file:
             return prob_mat
