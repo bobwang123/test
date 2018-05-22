@@ -1,6 +1,7 @@
 
 import json
 import numpy
+import random
 import timeit
 
 from scipy.stats import norm
@@ -68,14 +69,17 @@ class CostMatrix(object):
         cost_mat = tuple([tuple(r) for r in cost_mat])  # list(list()) to tuple(tuple())
         return cities, city_indices, cost_mat
 
-    def _occur_to_pickup_hour(self, occur_hour):
-        hour_offset = 6  # order occurring time and pickup time difference
+    def _occur_to_pickup_hour_tick(self, occur_hour):
+        # address order occurring time and pickup time difference
         assert 0 <= occur_hour <= self._num_prob_ticks - 1
-        pickup_hour = (occur_hour + hour_offset) % self._num_prob_ticks
+        pickup_hour = (occur_hour + 6) % self._num_prob_ticks
+        if (occur_hour > 14) and (random.random() > (1 - 0.9)):
+            pickup_hour = max(8, (occur_hour + 10) % self._num_prob_ticks)
         assert 0 <= pickup_hour <= self._num_prob_ticks - 1
         return pickup_hour
 
     def _parse_prob_json_file(self, prob_file):
+        random.seed(9973)  # use psuedo random series with fixed seed for reproducing purpose
         prob_mat = numpy.ones((len(self._city_indices), len(self._city_indices), self._num_prob_ticks))
         if not prob_file:
             return prob_mat
@@ -86,7 +90,7 @@ class CostMatrix(object):
                 to_loc_idx = self.city_idx(norm_dist["toCity"])
                 if from_loc_idx is None or to_loc_idx is None:
                     continue
-                pickup_hour = self._occur_to_pickup_hour(int(norm_dist["timeHour"]))
+                pickup_hour = self._occur_to_pickup_hour_tick(int(norm_dist["timeHour"]))
                 mean = norm_dist["avgCount"]
                 std = norm_dist["std"]
                 x = 1  # number of orders appearing at this time. TODO: could be a config option?
