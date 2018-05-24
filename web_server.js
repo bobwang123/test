@@ -7,7 +7,13 @@ var fs = require("fs")
 var crypto = require("crypto");
 const child_process = require('child_process');
 
-var PORT = 8139
+var PORT = function() {
+    var DEFAULT_PORT = 8138;
+    var port = process.env.PORT;
+    if (!port)
+        return DEFAULT_PORT;
+    return port;
+}();
 
 var get_client_ip = function(req) {
     var ip = req.headers['x-forwarded-for'] ||
