@@ -8,9 +8,6 @@ class Scheduler;
 extern void
 compute(Scheduler *sh);
 
-extern void
-upload(const char *api);
-
 /* Read characters from the pipe and echo them to stdout. */
 
 void
@@ -36,7 +33,7 @@ write_to_pipe (int file)
 }
 
 int
-multi_proc_main(const char *api, Scheduler *sh)
+multi_proc_main(Scheduler *sh)
 {
   pid_t pid;
   int mypipe[2];
@@ -72,7 +69,6 @@ multi_proc_main(const char *api, Scheduler *sh)
        Close other end first. */
     close (mypipe[1]);
     read_from_pipe (mypipe[0]);
-    upload(api);
     return EXIT_SUCCESS;
   }
 }

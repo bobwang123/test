@@ -18,7 +18,7 @@ extern const int vsp_debug = 0;
 #endif  // DEBUG
 
 extern int
-multi_proc_main(const char *api, Scheduler *sh);
+multi_proc_main(Scheduler *sh);
 
 static const char *_ORDER_FILE = "orders.http_api.json";
 static const char *_VEHICLE_FILE = "vehicles.http_api.json";
@@ -35,23 +35,6 @@ compute(Scheduler *sh)
   t1 = get_wall_time();
   sh->dump_plans(_OUTPUT_PLAN_FILE);
   print_wall_time_diff(t1, "Total Scheduler::dump_plans");
-}
-
-void
-upload(const char *api)
-{
-  /* disable C++ upload with curl due to Qingyun system(curl) unknown issues */
-  return;
-  if (!api)
-    return;
-  double t1 = get_wall_time();
-  string cmd = "curl --output curl.log --include --silent --show-error --form \"resultStr=<";
-  cmd += _OUTPUT_PLAN_FILE;
-  cmd += ";type=text/plain\" ";
-  cmd += api;
-  system(cmd.c_str());
-  cout << "$" << cmd << ";" << endl;
-  print_wall_time_diff(t1, "Total plans upload time");
 }
 
 namespace
@@ -80,17 +63,13 @@ namespace
  * OpenMP multi-thread is turned on by default.
  *
  * Example 1 (locat testing with multi-process)
- * $ ./vsp 1 "" "" ""
+ * $ ./vsp 1 "" ""
  *
  * Example 2 (download but no upload)
- * $ ./vsp 1 "http://<order_api>?mark=..." "http://<vehicle_api>?mark=..." ""
+ * $ ./vsp 1 "http://<order_api>?mark=..." "http://<vehicle_api>?mark=..."
  *
- * Example 3 (download and upload)
- * $ ./vsp 1 "http://<order_api>?mark=..." "http://<vehicle_api>?mark=..." \
- *      "http://<upload_api>?mark=..."
- *
- * Example 4 (locat testing with single-process)
- * $ ./vsp "" "" "" ""
+ * Example 3 (locat testing with single-process)
+ * $ ./vsp "" "" ""
  *
  */
 int main(int argc, char *argv[])
@@ -101,9 +80,9 @@ int main(int argc, char *argv[])
   double tg1 = get_wall_time();
   double t1 = get_wall_time();
   // arguement parsing
-  if (argc <= 4)
+  if (argc <= 3)
   {
-    cout << "** Error: too few arguements! Expect 4 arguements." << endl;
+    cout << "** Error: too few arguements! Expect 3 arguements." << endl;
     return -1;
   }
   const bool multi_proc = ('1' == argv[1][0]);
@@ -126,9 +105,6 @@ int main(int argc, char *argv[])
     }
   }
   print_wall_time_diff(t1, "Total order & vehicle download time");
-  const char *upload_api = !_is_empty(argv[4])? argv[4]: (const char *)0;
-  if (!upload_api)
-    cout << "** Warning: No plan will be uploaded due to no API." << endl;
   // start
   t1 = get_wall_time();
   // TODO: create cm and sh in child process to avoid duplicate memory usage
@@ -140,14 +116,9 @@ int main(int argc, char *argv[])
   print_wall_time_diff(t1, "Total init Scheduler");
   // multi-process switcher
   if (multi_proc)
-  {
-    multi_proc_main(upload_api, &sh);
-  }
+    multi_proc_main(&sh);
   else  // single process
-  {
     compute(&sh);
-    upload(upload_api);
-  }
   print_wall_time_diff(tg1, "Total");
   return 0;
 }
