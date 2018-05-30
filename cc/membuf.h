@@ -51,6 +51,7 @@ public:
     }
     else // enlarge the buffer
     {
+      std::cout << "current MemBuf is " << _capacity << std::endl;
       _buf.push_back(new char[_obj_size * _capacity]);
       _capacity += _capacity;
       old_cursor = _cursor = _buf.back();
@@ -77,7 +78,7 @@ public:
     empty_run_task(num_threads),
     order_task(num_threads)
   {
-    const size_t num_orders_per_thread = num_orders / num_threads;
+    const size_t num_orders_per_thread = num_orders / num_threads + 1;
     // This size must be enough theoretically
     const size_t init_buf_size_th = (2*num_orders - 2 - num_orders_per_thread)
       * (num_orders_per_thread - 1) / 2;
