@@ -63,10 +63,10 @@ Vehicle::sorted_candidate_plans()
     << " plans with the greatest profit." << endl;
   std::vector<Step *> &next_level1_steps = _start_route->next_steps();
   int c = 0;
-  for (std::vector<Step *>::iterator it = next_level1_steps.begin();
-       it != next_level1_steps.end(); ++it)
+  for (std::vector<Step *>::reverse_iterator rit = next_level1_steps.rbegin();
+       rit != next_level1_steps.rend(); ++rit)
   {
-    Step *step1 = *it;
+    Step *step1 = *rit;
     if (step1->is_virtual())
       continue;
     if (c >= _candidate_num_limit)

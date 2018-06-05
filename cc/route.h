@@ -30,8 +30,8 @@ public:
   Route(Task &task, const std::string &name, const Cost &cost_obj);
   ~Route();
   static bool
-    reverse_cmp(const Route *ra, const Route *rb)
-    { return rb->max_profit() < ra->max_profit(); }
+    cmp(const Route *ra, const Route *rb)
+    { return ra->max_profit() < rb->max_profit(); }
 public:
   const std::string &
     name() const { return _name; }
@@ -60,7 +60,7 @@ public:
       if (Consts::is_none(max_profit()))
         return false;
       return _next_steps.empty()
-        || (_next_steps.front()->max_profit() <= 0);
+        || (_next_steps.back()->max_profit() <= 0);
     }
   void
     add_next_step(Step *step) { _next_steps.push_back(step); }
