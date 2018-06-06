@@ -24,8 +24,6 @@ using namespace std;
 
 Route::Route(Task &task, const string &name, const Cost &cost_obj)
   : _this_task(task), _name(name), _cost(&cost_obj),
-  _profit(Consts::DOUBLE_NONE),
-  _max_profit(Consts::DOUBLE_NONE),
   _net_value(Consts::DOUBLE_NONE)
 {
   // create a special cost object if needed
@@ -59,18 +57,6 @@ const double
 Route::gross_margin() const
 {
   return _this_task.receivable() - expense();
-}
-
-const double
-Route::profit()
-{
-  if (Consts::is_none(_profit))
-  {
-    _profit = gross_margin();
-    if (_this_task.is_virtual())
-      _profit *= _this_task.prob();
-  }
-  return _profit;
 }
 
 const bool
@@ -151,28 +137,6 @@ void Route::update_net_value()
     sub_net_value = p * ps->net_value() + (1 - p) * sub_net_value;
   }
   _net_value += sub_net_value;
-}
-
-void
-Route::update_max_profit()
-{
-  if (!Consts::is_none(_max_profit))
-    return;
-  if (_next_steps.empty())
-  {
-    _max_profit = profit();
-    return;
-  }
-  for (std::vector<Step *>::iterator it = _next_steps.begin();
-       it != _next_steps.end(); ++it)
-    if (Consts::is_none((*it)->max_profit()))
-      (*it)->update_max_profit();
-  stable_sort(_next_steps.begin(), _next_steps.end(), Step::cmp);
-  Step *max_profit_step = _next_steps.back();
-  assert(max_profit_step);
-  _max_profit = profit();
-  if (max_profit_step->max_profit() > 0.0)
-    _max_profit += _this_task.prob() * max_profit_step->max_profit();
 }
 
 cJSON *

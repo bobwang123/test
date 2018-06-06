@@ -77,7 +77,6 @@ class OrderTask: public Task
   const double _load_time;  // hours
   const double _unload_time;  // hours
   const double _line_expense;  // yuan
-  Route *_max_profit_route;
   Route *_max_net_value_route;
 public:
 #ifdef DEBUG
@@ -105,8 +104,6 @@ public:
       receivable() const { return _receivable; }
     const double
       line_expense() const { return _line_expense; }
-    Route *
-      max_profit_route();
     Route *
       max_net_value_route();
 };

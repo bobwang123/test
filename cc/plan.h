@@ -34,27 +34,26 @@ public:
   void
     append(const Step *s) { _steps.push_back(s); }
   const double
-    expected_profit() const
+    expected_net_value() const
     {
       if (_steps.empty())
         return Consts::DOUBLE_NONE;
-      //return _steps.front()->max_profit();
-      return _steps.front()->net_value();
+      const Step *first_step = _steps.front();
+      return first_step->net_value() * first_step->prob();
     }
   const double
-    profit() const
+    total_gross_margin() const
     {
       if (_steps.empty())
         return Consts::DOUBLE_NONE;
-      double total_profit = 0.0;
+      double sum_gross_margin = 0.0;
       for (std::vector<const Step *>::const_iterator cit = _steps.begin();
            cit != _steps.end(); ++cit)
-        // total_profit += (*cit)->profit() / (*cit)->prob();
-        total_profit += (*cit)->net_value();
-      return total_profit;
+        sum_gross_margin += (*cit)->gross_margin();
+      return sum_gross_margin;
     }
   const double
-    prob() const
+    joint_prob() const
     {
       if (_steps.empty())
         return Consts::DOUBLE_NONE;
@@ -68,12 +67,12 @@ public:
     to_dict(const CostMatrix &cost_prob_mat) const
     {
         cJSON *plan_dict = cJSON_CreateObject();
-        cJSON_AddItemToObjectCS(plan_dict, "expectedProfit",
-                                cJSON_CreateNumber(expected_profit()));
-        cJSON_AddItemToObjectCS(plan_dict, "profit",
-                                cJSON_CreateNumber(profit()));
-        cJSON_AddItemToObjectCS(plan_dict, "probability",
-                                cJSON_CreateNumber(prob()));
+        cJSON_AddItemToObjectCS(plan_dict, "expectedNetValue",
+                                cJSON_CreateNumber(expected_net_value()));
+        cJSON_AddItemToObjectCS(plan_dict, "totalGrossMargin",
+                                cJSON_CreateNumber(total_gross_margin()));
+        cJSON_AddItemToObjectCS(plan_dict, "jointProbability",
+                                cJSON_CreateNumber(joint_prob()));
         cJSON_AddItemToObjectCS(plan_dict, "routes",
                                 _steps_to_cJSON_Array(cost_prob_mat));
         return plan_dict;
