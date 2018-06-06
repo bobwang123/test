@@ -69,9 +69,15 @@ public:
         cJSON *plan_dict = cJSON_CreateObject();
         cJSON_AddItemToObjectCS(plan_dict, "expectedNetValue",
                                 cJSON_CreateNumber(expected_net_value()));
+        cJSON_AddItemToObjectCS(plan_dict, "expectedProfit",
+                                cJSON_CreateNumber(expected_net_value()));
         cJSON_AddItemToObjectCS(plan_dict, "totalGrossMargin",
                                 cJSON_CreateNumber(total_gross_margin()));
+        cJSON_AddItemToObjectCS(plan_dict, "profit",
+                                cJSON_CreateNumber(total_gross_margin()));
         cJSON_AddItemToObjectCS(plan_dict, "jointProbability",
+                                cJSON_CreateNumber(joint_prob()));
+        cJSON_AddItemToObjectCS(plan_dict, "probability",
                                 cJSON_CreateNumber(joint_prob()));
         cJSON_AddItemToObjectCS(plan_dict, "routes",
                                 _steps_to_cJSON_Array(cost_prob_mat));
