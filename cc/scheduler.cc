@@ -298,8 +298,8 @@ Scheduler::run()
   double t1 = get_wall_time();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
-    (*it)->compute_max_profit();
-  print_wall_time_diff(t1, "Compute max profit of vehicles");
+    (*it)->compute_net_value();  // (*it)->compute_max_profit();
+  print_wall_time_diff(t1, "Compute net values of vehicles"); // print_wall_time_diff(t1, "Compute max profit of vehicles");
 #ifdef DEBUG
   Route::print_num_objs();
   Step::print_num_objs();

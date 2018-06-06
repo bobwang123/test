@@ -20,7 +20,7 @@ Step::print_num_objs()
 
 Step::Step(Route &empty_run_route, OrderTask &order_task)
   :_empty_run_route(empty_run_route), _order_task(order_task),
-  _max_profit(Consts::DOUBLE_NONE)
+  _max_profit(Consts::DOUBLE_NONE), _net_value(Consts::DOUBLE_NONE)
 {
 #ifdef DEBUG
   omp_set_lock(&writelock);
@@ -37,6 +37,15 @@ const double
 Step::profit() const
 {
   return _empty_run_route.profit() + _order_task.max_profit_route()->profit();
+}
+
+void
+Step::update_net_value()
+{
+  if (!Consts::is_none(_net_value))
+    return;
+  _net_value = _empty_run_route.gross_margin()
+    + _order_task.max_net_value_route()->net_value();
 }
 
 void

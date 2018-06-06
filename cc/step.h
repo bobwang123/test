@@ -12,6 +12,7 @@ class Step
   Route &_empty_run_route;
   OrderTask &_order_task;
   double _max_profit;
+  double _net_value;
 public:
 #ifdef DEBUG
   static void print_num_objs();
@@ -21,6 +22,9 @@ public:
   static bool
     cmp(const Step *sa, const Step *sb)
     { return sa->max_profit() < sb->max_profit(); }
+  static bool
+    cmp_net_value(const Step *sa, const Step *sb)
+    { return sa->net_value() < sb->net_value(); }
 public:
   const double
     prob() const { return _order_task.prob(); }
@@ -30,6 +34,10 @@ public:
     is_virtual() const { return _order_task.is_virtual(); }
   const double
     max_profit() const { return _max_profit; }
+  const double
+    net_value() const { return _net_value; };
+  void
+    update_net_value();
   void
     update_max_profit();
   Step *

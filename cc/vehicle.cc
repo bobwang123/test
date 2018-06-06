@@ -56,6 +56,12 @@ Vehicle::compute_max_profit()
   _start_route->update_max_profit();
 }
 
+void
+Vehicle::compute_net_value()
+{
+  _start_route->update_net_value();
+}
+
 const vector<Plan *>&
 Vehicle::sorted_candidate_plans()
 {

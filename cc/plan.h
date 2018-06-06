@@ -38,7 +38,8 @@ public:
     {
       if (_steps.empty())
         return Consts::DOUBLE_NONE;
-      return _steps.front()->max_profit();
+      //return _steps.front()->max_profit();
+      return _steps.front()->net_value();
     }
   const double
     profit() const
@@ -48,7 +49,8 @@ public:
       double total_profit = 0.0;
       for (std::vector<const Step *>::const_iterator cit = _steps.begin();
            cit != _steps.end(); ++cit)
-        total_profit += (*cit)->profit() / (*cit)->prob();
+        // total_profit += (*cit)->profit() / (*cit)->prob();
+        total_profit += (*cit)->net_value();
       return total_profit;
     }
   const double
