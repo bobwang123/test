@@ -42,7 +42,7 @@ public:
             const double max_wait_time=Consts::DOUBLE_INF,
             const double max_empty_run_distance=Consts::DOUBLE_INF);
   void
-    compute_max_profit();
+    compute_net_value();
   const std::vector<Plan *>&
     sorted_candidate_plans();
   cJSON *

@@ -11,7 +11,7 @@ class Step
 #endif
   Route &_empty_run_route;
   OrderTask &_order_task;
-  double _max_profit;
+  double _net_value;
 public:
 #ifdef DEBUG
   static void print_num_objs();
@@ -19,21 +19,21 @@ public:
   Step(Route &empty_run_route, OrderTask &order_task);
   ~Step();
   static bool
-    reverse_cmp(const Step *sa, const Step *sb)
-    { return sb->max_profit() < sa->max_profit(); }
+    cmp_net_value(const Step *sa, const Step *sb)
+    { return sa->net_value() < sb->net_value(); }
 public:
   const double
     prob() const { return _order_task.prob(); }
-  const double
-    profit() const;
   const bool
     is_virtual() const { return _order_task.is_virtual(); }
   const double
-    max_profit() const { return _max_profit; }
+    net_value() const { return _net_value; };
+  const double
+    gross_margin() const;
   void
-    update_max_profit();
+    update_net_value();
   Step *
-    next_max_profit_step();
+    next_net_value_step();
   const bool
     is_terminal() const;
   cJSON *

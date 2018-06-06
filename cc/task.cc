@@ -80,7 +80,7 @@ OrderTask::OrderTask(const CostMatrix::CityIdxType loc_start,
                      const double line_expense)
   : Task(loc_start, loc_end, start_time, occur_prob, is_virtual, name),
   _receivable(receivable), _load_time(load_time), _unload_time(unload_time),
-  _line_expense(line_expense), _max_profit_route(0)
+  _line_expense(line_expense), _max_net_value_route(0)
 {
 #ifdef DEBUG
   omp_set_lock(&writelock);
@@ -94,18 +94,17 @@ OrderTask::~OrderTask()
 }
 
 Route *
-OrderTask::max_profit_route()
+OrderTask::max_net_value_route()
 {
-  if (_max_profit_route)
-    return _max_profit_route;
-  // calculate max profit recursively
+  if (_max_net_value_route)
+    return _max_net_value_route;
+  // calculate max net value recursively
   vector<Route *> &rs = routes();
   assert(!rs.empty());
   for (vector<Route *>::iterator it = rs.begin(); it != rs.end(); ++it)
-    (*it)->update_max_profit();
-  stable_sort(rs.begin(), rs.end(), Route::reverse_cmp);
-  _max_profit_route = rs.front();
-  return _max_profit_route;
+    (*it)->update_net_value();
+  return _max_net_value_route =
+    *max_element(rs.begin(), rs.end(), Route::cmp_net_value);
 }
 
 #ifdef DEBUG

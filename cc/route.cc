@@ -23,7 +23,8 @@ Route::print_num_objs()
 using namespace std;
 
 Route::Route(Task &task, const string &name, const Cost &cost_obj)
-  : _this_task(task), _name(name), _cost(&cost_obj)
+  : _this_task(task), _name(name), _cost(&cost_obj),
+  _net_value(Consts::DOUBLE_NONE)
 {
   // create a special cost object if needed
   if (!_this_task.is_virtual() && !Consts::is_none(_this_task.line_expense()))
@@ -32,8 +33,6 @@ Route::Route(Task &task, const string &name, const Cost &cost_obj)
                      _cost->duration());
   _expected_end_time = _this_task.expected_start_time() 
     + _this_task.no_run_time() + _cost->duration();
-  _profit = Consts::DOUBLE_NONE;
-  _max_profit = Consts::DOUBLE_NONE;
 #ifdef DEBUG
   omp_set_lock(&writelock);
   ++_num_objs;
@@ -55,15 +54,9 @@ Route::~Route()
 }
 
 const double
-Route::profit()
+Route::gross_margin() const
 {
-  if (Consts::is_none(_profit))
-  {
-    _profit = _this_task.receivable() - expense();
-    if (_this_task.is_virtual())
-      _profit *= _this_task.prob();
-  }
-  return _profit;
+  return _this_task.receivable() - expense();
 }
 
 const bool
@@ -118,26 +111,32 @@ Route::connect(OrderTask &task,
   return connected;
 }
 
-void
-Route::update_max_profit()
+void Route::update_net_value()
 {
-  if (!Consts::is_none(_max_profit))
+  if (!Consts::is_none(_net_value))
     return;
+  _net_value = gross_margin();
   if (_next_steps.empty())
-  {
-    _max_profit = profit();
     return;
-  }
   for (std::vector<Step *>::iterator it = _next_steps.begin();
        it != _next_steps.end(); ++it)
-    if (Consts::is_none((*it)->max_profit()))
-      (*it)->update_max_profit();
-  stable_sort(_next_steps.begin(), _next_steps.end(), Step::reverse_cmp);
-  Step *max_profit_step = _next_steps.front();
-  assert(max_profit_step);
-  _max_profit = profit();
-  if (max_profit_step->max_profit() > 0.0)
-    _max_profit += _this_task.prob() * max_profit_step->max_profit();
+  {
+    Step *ps = *it;
+    if (Consts::is_none(ps->net_value()))
+      ps->update_net_value();
+  }
+  stable_sort(_next_steps.begin(), _next_steps.end(), Step::cmp_net_value);
+  /* Greedy strategy leads to the maximum math expectation
+   * of all sub-Step net_values. */
+  double sub_net_value = 0.0;
+  for (std::vector<Step *>::iterator it = _next_steps.begin();
+       it != _next_steps.end(); ++it)
+  {
+    const Step *ps = *it;
+    const double p = ps->prob();
+    sub_net_value = p * ps->net_value() + (1 - p) * sub_net_value;
+  }
+  _net_value += sub_net_value;
 }
 
 cJSON *
