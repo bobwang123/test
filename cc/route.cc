@@ -69,7 +69,7 @@ Route::connect(OrderTask &task,
 {
   const double max_empty_run_time =
     task.expected_start_time() - expected_end_time();
-  if (max_empty_run_time <= 0)
+  if (max_empty_run_time < 0)
     return false;
   bool connected = false;
   // check out every possible route duration between current location and task
