@@ -8,7 +8,7 @@ ENGINE ?= "Python"
 
 TIME_STAMP:=$(shell date +%s)
 RANDOM_INT:=$(shell echo $$RANDOM)
-UNIQ_RUN_DIR:=run_$(MARK)/$(TIME_STAMP)_$(RANDOM_INT)
+UNIQ_RUN_DIR:=run/$(MARK)/$(TIME_STAMP)_$(RANDOM_INT)
 
 CXX_OUTPUT:=cxx_outplans.json
 CXX_UPLOAD_CMD:=true
@@ -18,12 +18,12 @@ endif
 
 # select optimization engine
 ifeq ($(ENGINE),C++)
-    CMD_RUN:= /usr/bin/time env OMP_NUM_THREADS=6 ../../cc/vsp 0 \
+    CMD_RUN:= /usr/bin/time env OMP_NUM_THREADS=6 ../../../cc/vsp 0 \
 	"$(ORDER_API)?mark=$(MARK)" \
 	"$(VEHICLE_API)?mark=$(MARK)" \
 	"$(UPLOAD_API)?mark=$(MARK)"
 else
-    CMD_RUN:=/usr/bin/time python -O ../../python/ \
+    CMD_RUN:=/usr/bin/time python -O ../../../python/ \
 	--order-file="$(ORDER_API)?mark=$(MARK)" \
 	--vehicle-file="$(VEHICLE_API)?mark=$(MARK)" \
 	--plan-upload-api="$(UPLOAD_API)?mark=$(MARK)"
@@ -34,9 +34,9 @@ endif
 all:
 	echo MARK=$(MARK) ENGINE=$(ENGINE)
 	mkdir -p $(UNIQ_RUN_DIR) && cd $(UNIQ_RUN_DIR) \
-	    && ln -sf ../../$(COST_CACHE_FILE) \
-	    && ln -sf ../../$(PROB_CACHE_FILE) \
-	    && ln -sf ../../$(COST_PROB_CC_CACHE_FILE) \
+	    && ln -sf ../../../$(COST_CACHE_FILE) \
+	    && ln -sf ../../../$(PROB_CACHE_FILE) \
+	    && ln -sf ../../../$(COST_PROB_CC_CACHE_FILE) \
 	    && $(CMD_RUN) >& run.log \
 	    && $(CXX_UPLOAD_CMD)
 
