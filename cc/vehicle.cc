@@ -103,7 +103,8 @@ Vehicle::plans_to_dict(const CostMatrix &cost_prob_mat) const
 cJSON *
 Vehicle::to_treemap(const CostMatrix &cost_prob_mat) const
 {
+  const Step *step1 = _start_route->next_steps().back();
   cJSON *treemap = cJSON_CreateArray();
-  cJSON_AddItemToArray(treemap, _start_route->to_treemap(1.0, cost_prob_mat));
+  cJSON_AddItemToArray(treemap, step1->to_treemap(1.0, cost_prob_mat));
   return treemap;
 }
