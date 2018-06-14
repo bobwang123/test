@@ -190,11 +190,12 @@ Route::to_treemap(const double cond_prob,
 {
   cJSON *route_treemap = cJSON_CreateObject();
   const double prob = _this_task.prob();
-  enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _SIZE};
+  enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _TIME_STAMP, _SIZE};
   const double value[_SIZE] = {
       [_NET_VALUE_EFF] = cond_prob * prob * net_value(),
       [_NET_VALUE] = net_value(),
-      [_PROB] = prob
+      [_PROB] = prob,
+      [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3)
   };
   cJSON_AddItemToObjectCS(route_treemap, "value",
                           cJSON_CreateDoubleArray(value, _SIZE));
