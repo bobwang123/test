@@ -65,6 +65,9 @@ public:
     add_next_step(Step *step) { _next_steps.push_back(step); }
   cJSON *
     to_dict(const CostMatrix &cost_prob_mat) const;
+  cJSON *
+    to_treemap(const double cond_prob,
+               const CostMatrix &cost_prob_mat) const;
 };
 
 #endif /* __ROUTE_H__ */

@@ -32,6 +32,7 @@ public:
     cmp(const Vehicle *va, const Vehicle *vb)
     { return va->avl_time() < vb->avl_time(); }
 public:
+  const std::string &name() const { return _name; }
   double
     avl_time() const { return _avl_time; }
   bool
@@ -47,6 +48,8 @@ public:
     sorted_candidate_plans();
   cJSON *
     plans_to_dict(const CostMatrix &cost_prob_mat) const;
+  cJSON *
+    to_treemap(const CostMatrix &cost_prob_mat) const;
 };
 
 #endif  // __VEHICLE_H__

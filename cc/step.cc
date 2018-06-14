@@ -74,3 +74,11 @@ Step::to_dict(const CostMatrix &cost_prob_mat) const
   return arr;
 }
 
+cJSON *
+Step::to_treemap(const double parent_prob, const CostMatrix &cost_prob_mat) const
+{
+  // TODO: add empty run info to the treemap
+  return
+    _order_task.max_net_value_route()->to_treemap(parent_prob, cost_prob_mat);
+}
+

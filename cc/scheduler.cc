@@ -335,3 +335,25 @@ Scheduler::dump_plans(const char *filename)
   print_wall_time_diff(t1, "Print JSON to file and free char *");
 }
 
+void
+Scheduler::dump_value_networks(const char *filename)
+{
+  double t1 = get_wall_time();
+  cJSON *json = cJSON_CreateObject();
+  for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
+       it != _sorted_vehicles.end(); ++it)
+    cJSON_AddItemToObject(json, (*it)->name().c_str(),
+                          (*it)->to_treemap(_cost_prob));
+  print_wall_time_diff(t1, "Create a value network for each vehicle");
+  t1 = get_wall_time();
+  char *json_str = cJSON_PrintBuffered(json, 10000000, 1);  // TODO: nonformated
+  cJSON_Delete(json);
+  print_wall_time_diff(t1, "Convert JSON object to char *");
+  t1 = get_wall_time();
+  ofstream outf(filename);
+  outf << json_str;
+  outf.close();
+  free(json_str);
+  print_wall_time_diff(t1, "Print JSON to file and free char *");
+}
+

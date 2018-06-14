@@ -38,6 +38,8 @@ public:
     is_terminal() const;
   cJSON *
     to_dict(const CostMatrix &cost_prob_mat) const;
+  cJSON *
+    to_treemap(const double parent_prob, const CostMatrix &cost_prob_mat) const;
 };
 
 #endif /* __STEP_H__ */

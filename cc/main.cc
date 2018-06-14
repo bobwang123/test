@@ -24,6 +24,7 @@ static const char *_ORDER_FILE = "orders.http_api.json";
 static const char *_VEHICLE_FILE = "vehicles.http_api.json";
 static const char *_COST_PROB_FILE = "cost_prob.cc.json";
 static const char *_OUTPUT_PLAN_FILE = "cxx_outplans.json";
+static const char *_OUTPUT_VALUE_NETWORK_FILE = "cxx_value_network.json";
 
 void
 compute(Scheduler *sh)
@@ -35,6 +36,8 @@ compute(Scheduler *sh)
   t1 = get_wall_time();
   sh->dump_plans(_OUTPUT_PLAN_FILE);
   print_wall_time_diff(t1, "Total Scheduler::dump_plans");
+  sh->dump_value_networks(_OUTPUT_VALUE_NETWORK_FILE);
+  print_wall_time_diff(t1, "Total Scheduler::dump_value_networks");
 }
 
 namespace

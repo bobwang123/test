@@ -45,6 +45,8 @@ public:
     run();
   void
     dump_plans(const char *filename);
+  void
+    dump_value_networks(const char *filename);
 };
 
 #endif  // __SCHEDULER_H__

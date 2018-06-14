@@ -184,3 +184,38 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
   return route_dict;
 }
 
+cJSON *
+Route::to_treemap(const double cond_prob,
+                  const CostMatrix &cost_prob_mat) const
+{
+  cJSON *route_treemap = cJSON_CreateObject();
+  const double prob = _this_task.prob();
+  enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _SIZE};
+  const double value[_SIZE] = {
+      [_NET_VALUE_EFF] = cond_prob * prob * net_value(),
+      [_NET_VALUE] = net_value(),
+      [_PROB] = prob
+  };
+  cJSON_AddItemToObjectCS(route_treemap, "value",
+                          cJSON_CreateDoubleArray(value, _SIZE));
+  string name = cost_prob_mat.city_name(_this_task.loc_from())
+    + "->" + cost_prob_mat.city_name(_this_task.loc_to());
+  cJSON_AddItemToObjectCS(route_treemap, "name",
+                          cJSON_CreateString(name.c_str()));
+  cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
+  if (_next_steps.empty())
+    return route_treemap;
+  cJSON *children = cJSON_CreateArray();
+  // Greedy strategy
+  double p = 1.0;
+  const double PROB_TH = 10e-2;
+  for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
+       it != _next_steps.rend() && p > PROB_TH; ++it)
+  {
+    const Step *ns = *it;
+    cJSON_AddItemToArray(children, ns->to_treemap(p, cost_prob_mat));
+    p *= 1.0 - ns->prob();
+  }
+  cJSON_AddItemToObjectCS(route_treemap, "children", children);
+  return route_treemap;
+}
