@@ -66,7 +66,7 @@ public:
   cJSON *
     to_dict(const CostMatrix &cost_prob_mat) const;
   cJSON *
-    to_treemap(const double cond_prob,
+    to_treemap(const int level, const double cond_prob,
                const CostMatrix &cost_prob_mat) const;
 };
 

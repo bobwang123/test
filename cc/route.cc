@@ -185,7 +185,7 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
 }
 
 cJSON *
-Route::to_treemap(const double cond_prob,
+Route::to_treemap(const int level, const double cond_prob,
                   const CostMatrix &cost_prob_mat) const
 {
   cJSON *route_treemap = cJSON_CreateObject();
@@ -214,7 +214,7 @@ Route::to_treemap(const double cond_prob,
        it != _next_steps.rend() && p > PROB_TH; ++it)
   {
     const Step *ns = *it;
-    cJSON_AddItemToArray(children, ns->to_treemap(p, cost_prob_mat));
+    cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
     p *= 1.0 - ns->prob();
   }
   cJSON_AddItemToObjectCS(route_treemap, "children", children);

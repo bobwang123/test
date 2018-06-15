@@ -105,6 +105,6 @@ Vehicle::to_treemap(const CostMatrix &cost_prob_mat) const
 {
   const Step *step1 = _start_route->next_steps().back();
   cJSON *treemap = cJSON_CreateArray();
-  cJSON_AddItemToArray(treemap, step1->to_treemap(1.0, cost_prob_mat));
+  cJSON_AddItemToArray(treemap, step1->to_treemap(1, 1.0, cost_prob_mat));
   return treemap;
 }
