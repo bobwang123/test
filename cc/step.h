@@ -20,7 +20,10 @@ public:
   ~Step();
   static bool
     cmp_net_value(const Step *sa, const Step *sb)
-    { return sa->net_value() < sb->net_value(); }
+    { return sa->net_value() < sb->net_value()
+      || ((sa->net_value() == sb->net_value())
+          && (sa->_order_task.expected_start_time()
+              > sb->_order_task.expected_start_time())); }
 public:
   const double
     prob() const { return _order_task.prob(); }

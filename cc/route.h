@@ -30,7 +30,10 @@ public:
   ~Route();
   static bool
     cmp_net_value(const Route *ra, const Route *rb)
-    { return ra->net_value() < rb->net_value(); }
+    { return ra->net_value() < rb->net_value()
+      || ((ra->net_value() == rb->net_value())
+          && (ra->_this_task.expected_start_time()
+              > rb->_this_task.expected_start_time())); }
 public:
   const std::string &
     name() const { return _name; }
