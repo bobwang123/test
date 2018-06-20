@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <cassert>
 
-#ifdef DEBUG
 #include <iostream>
+#ifdef DEBUG
 #include <omp.h>
 extern omp_lock_t writelock;
 
@@ -193,6 +193,7 @@ Route::to_treemap(const int level, const double cond_prob,
   enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _TIME_STAMP, _SIZE};
   const double value[_SIZE] = {
       [_NET_VALUE_EFF] = cond_prob * prob * net_value(),
+      //[_NET_VALUE_EFF] = net_value(),
       [_NET_VALUE] = net_value(),
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3)
@@ -203,16 +204,23 @@ Route::to_treemap(const int level, const double cond_prob,
     + "->" + cost_prob_mat.city_name(_this_task.loc_to());
   cJSON_AddItemToObjectCS(route_treemap, "name",
                           cJSON_CreateString(name.c_str()));
-  cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
+  //cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
   if (_next_steps.empty())
     return route_treemap;
   cJSON *children = cJSON_CreateArray();
   // Greedy strategy
   double p = 1.0;
-  const double PROB_TH = 10e-2;
+  const double PROB_TH = -10e-2;
+  if (level > 3)
+    return route_treemap;
+  // dump limited nodes
+  size_t c = 0;
+  std::cout << "[!]Level = " << level << ", children step size = " << _next_steps.size() << std::endl;
   for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
-       it != _next_steps.rend() && p > PROB_TH; ++it)
+       it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
   {
+    if (c % 5)
+      continue;
     const Step *ns = *it;
     cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
     p *= 1.0 - ns->prob();
