@@ -81,9 +81,10 @@ Route::connect(OrderTask &task,
     const Cost &c = cit->second;
     const double wait_time = max_empty_run_time - c.duration();
     const double empty_run_distance = c.distance();
-    if (wait_time < 0
-        || wait_time > max_wait_time
-        || empty_run_distance > max_empty_run_distance)
+    if (_this_task.is_virtual()
+        && (wait_time < 0
+            || wait_time > max_wait_time
+            || empty_run_distance > max_empty_run_distance))
       continue;
     // create an EmptyRunTask object if task can be connected via this route
     const double empty_run_start_time = expected_end_time() + wait_time;
