@@ -60,6 +60,12 @@ private:
 public:
   explicit CostMatrix(const char *filename);
   ~CostMatrix();
+  static std::size_t hour_tick(double timestamp_in_hour)
+  {
+    const std::size_t time_zone = +8;
+    return static_cast<std::size_t>(std::floor(timestamp_in_hour + time_zone))
+      % _NUM_PROB_TICKS;
+  }
 private:
   std::vector<std::string> &
     _create_cities(cJSON *json);
@@ -83,11 +89,7 @@ public:
          CityIdxType end_loc,
          double time_in_hour) const
     {
-      const std::size_t time_zone = +8;
-      const std::size_t hour_tick = 
-        static_cast<std::size_t>(std::floor(time_in_hour + time_zone)) % _NUM_PROB_TICKS;
-      // std::cout << "time_in_hour = " << time_in_hour << " hour_tick = " << hour_tick << std::endl;
-      return _prob_mat[start_loc][end_loc][hour_tick];
+      return _prob_mat[start_loc][end_loc][hour_tick(time_in_hour)];
     }
   const CostMapType &
     costs(CityIdxType start_loc,
