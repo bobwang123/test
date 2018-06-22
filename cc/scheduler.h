@@ -44,6 +44,10 @@ private:
     _build_order_dag();
   void
     _analyze_orders();
+  void
+    _update_terminal_net_value();
+  void
+    _reset_net_value_stuff();
 public:
   void
     run();

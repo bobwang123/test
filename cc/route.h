@@ -60,6 +60,8 @@ public:
     update_net_value();
   const double
     net_value() const { return _net_value; }
+  void
+    net_value(double v) { _net_value = v; }
   const double
     expected_end_time() const { return _expected_end_time; }
   const bool

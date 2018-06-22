@@ -31,6 +31,8 @@ public:
     is_virtual() const { return _order_task.is_virtual(); }
   const double
     net_value() const { return _net_value; };
+  void
+    net_value(double v) { _net_value = v; };
   const double
     gross_margin() const;
   void

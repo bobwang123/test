@@ -330,13 +330,84 @@ Scheduler::_analyze_orders()
 }
 
 void
+Scheduler::_update_terminal_net_value()
+{
+  const size_t ncities = _cost_prob.num_cities();
+  const size_t nticks = CostMatrix::num_hour_ticks();
+  for (size_t fri = 0; fri < ncities; ++fri)
+    for (size_t toi = 0; toi < ncities; ++toi)
+      for (size_t tki = 0; tki < nticks; ++tki)
+      {
+        vector<OrderTask *> &tasks = _categorized_orders[fri][toi][tki];
+        if (tasks.empty())
+          continue;
+        OrderTask *task_1st =
+          *min_element(tasks.begin(), tasks.end(), Task::cmp);
+        Route *route_1st = task_1st->max_net_value_route();
+        if (!route_1st)
+          continue;
+        for (vector<OrderTask *>::iterator it = tasks.begin();
+             it != tasks.end(); ++it)
+        {
+          OrderTask *task = *it;
+          assert(task);
+          Route *route = task->max_net_value_route();
+          assert(route);
+          const bool isTerminalTask = route->next_steps().empty();
+          if (!isTerminalTask)
+            continue;
+          const double TIME_WINDOW_IN_HOUR = 240.0;
+          task->receivable(route_1st->net_value() / TIME_WINDOW_IN_HOUR
+                           * route->duration());
+          task->line_expense(0.0);
+        }
+      }
+}
+
+void
+Scheduler::_reset_net_value_stuff()
+{
+  assert(_sorted_orders);
+  for (size_t i = 0; i < _num_sorted_orders; ++i)
+  {
+    _sorted_orders[i]->reset_max_net_value_route();
+    vector<Route *> &routes = _sorted_orders[i]->routes();
+    for (vector<Route *>::iterator it = routes.begin();
+         it != routes.end(); ++it)
+    {
+      Route *route = *it;
+      route->net_value(Consts::DOUBLE_NONE);
+      std::vector<Step *> &steps = route->next_steps();
+      for (std::vector<Step *>::iterator sit = steps.begin();
+           sit !=steps.end(); ++sit)
+        (*sit)->net_value(Consts::DOUBLE_NONE);
+    }
+  }
+}
+
+extern int NITER;
+
+void
 Scheduler::run()
 {
   _analyze_orders();
   double t1 = get_wall_time();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
-    (*it)->compute_net_value();
+  {
+    int i = 0;
+    for (;;)
+    {
+      double t2 = get_wall_time();
+      (*it)->compute_net_value();
+      print_wall_time_diff(t2, "Compute net values of a vehicle");
+      if (++i >= NITER)
+        break;
+      // prepare for next iteration
+      _update_terminal_net_value();
+      _reset_net_value_stuff();
+    }
+  }
   print_wall_time_diff(t1, "Compute net values of vehicles");
 #ifdef DEBUG
   Route::print_num_objs();

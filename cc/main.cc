@@ -60,6 +60,8 @@ namespace
     }
 }
 
+int NITER = 1;
+
 /*
  * **Usage**
  *
@@ -77,6 +79,8 @@ namespace
  */
 int main(int argc, char *argv[])
 {
+  cout << "Input number of iteration: ";
+  cin >> NITER;
 #ifdef DEBUG
   omp_init_lock(&writelock);
 #endif

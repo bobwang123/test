@@ -114,6 +114,8 @@ public:
       line_expense(double v) { _line_expense = v; }
     Route *
       max_net_value_route();
+    void
+      reset_max_net_value_route() { _max_net_value_route = 0; }
 };
 
 class EmptyRunTask: public Task
