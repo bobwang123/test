@@ -196,11 +196,12 @@ Route::to_treemap(const int level, const double cond_prob,
   assert(empty_run_cost <= 0.0);
   const double step_net_value = net_value() + empty_run_cost;
   const double prob = _this_task.prob();
-  enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _TIME_STAMP, _SIZE};
+  enum {_NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _SIZE};
   const double value[_SIZE] = {
+      // _NET_VALUE: decision making factor
+      [_NET_VALUE] = step_net_value,
       // _NET_VALUE_EFF: contribution to this level
       [_NET_VALUE_EFF] = cond_prob * prob * step_net_value,
-      [_NET_VALUE] = step_net_value,
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3)
   };
