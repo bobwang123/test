@@ -95,6 +95,10 @@ public:
     costs(CityIdxType start_loc,
           CityIdxType end_loc) const
     { return _cost_mat[start_loc][end_loc]; }
+  std::size_t
+    num_cities() const { return _cities.size(); }
+  static std::size_t
+    num_hour_ticks() { return _NUM_PROB_TICKS; }
 };
 
 #endif /* __COST_H__ */
