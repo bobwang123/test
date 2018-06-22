@@ -44,6 +44,7 @@ public:
             const double max_empty_run_distance=Consts::DOUBLE_INF);
   void
     compute_net_value();
+  void reset_net_value_stuff();
   const std::vector<Plan *>&
     sorted_candidate_plans();
   cJSON *

@@ -56,6 +56,12 @@ Vehicle::compute_net_value()
   _start_route->update_net_value();
 }
 
+void
+Vehicle::reset_net_value_stuff()
+{
+  _start_route->reset_net_value_stuff();
+}
+
 const vector<Plan *>&
 Vehicle::sorted_candidate_plans()
 {

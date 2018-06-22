@@ -365,7 +365,7 @@ Scheduler::_update_terminal_net_value()
 }
 
 void
-Scheduler::_reset_net_value_stuff()
+Scheduler::_reset_order_net_value_stuff()
 {
   assert(_sorted_orders);
   for (size_t i = 0; i < _num_sorted_orders; ++i)
@@ -374,14 +374,7 @@ Scheduler::_reset_net_value_stuff()
     vector<Route *> &routes = _sorted_orders[i]->routes();
     for (vector<Route *>::iterator it = routes.begin();
          it != routes.end(); ++it)
-    {
-      Route *route = *it;
-      route->net_value(Consts::DOUBLE_NONE);
-      std::vector<Step *> &steps = route->next_steps();
-      for (std::vector<Step *>::iterator sit = steps.begin();
-           sit !=steps.end(); ++sit)
-        (*sit)->net_value(Consts::DOUBLE_NONE);
-    }
+      (*it)->reset_net_value_stuff();
   }
 }
 
@@ -395,17 +388,20 @@ Scheduler::run()
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
   {
+    double t2 = get_wall_time();
     int i = 0;
     for (;;)
     {
-      double t2 = get_wall_time();
-      (*it)->compute_net_value();
+      Vehicle *vehicle = *it;
+      vehicle->compute_net_value();
       print_wall_time_diff(t2, "Compute net values of a vehicle");
+      t2 = get_wall_time();
       if (++i >= NITER)
         break;
       // prepare for next iteration
       _update_terminal_net_value();
-      _reset_net_value_stuff();
+      _reset_order_net_value_stuff();
+      vehicle->reset_net_value_stuff();
     }
   }
   print_wall_time_diff(t1, "Compute net values of vehicles");

@@ -132,6 +132,16 @@ void Route::update_net_value()
   _net_value += sub_net_value;
 }
 
+void
+Route::reset_net_value_stuff()
+{
+  net_value(Consts::DOUBLE_NONE);
+  std::vector<Step *> &steps = next_steps();
+  for (std::vector<Step *>::iterator sit = steps.begin();
+       sit !=steps.end(); ++sit)
+    (*sit)->net_value(Consts::DOUBLE_NONE);
+}
+
 cJSON *
 Route::to_dict(const CostMatrix &cost_prob_mat) const
 {

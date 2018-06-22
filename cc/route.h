@@ -74,6 +74,8 @@ public:
     }
   void
     add_next_step(Step *step) { _next_steps.push_back(step); }
+  void
+    reset_net_value_stuff();
   cJSON *
     to_dict(const CostMatrix &cost_prob_mat) const;
   cJSON *

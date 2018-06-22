@@ -47,7 +47,7 @@ private:
   void
     _update_terminal_net_value();
   void
-    _reset_net_value_stuff();
+    _reset_order_net_value_stuff();
 public:
   void
     run();
