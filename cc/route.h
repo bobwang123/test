@@ -44,6 +44,8 @@ public:
       return Consts::is_none(line_expense) ? _cost->expense() : line_expense;
     }
   const double
+    duration() const { return _cost->duration(); }
+  const double
     gross_margin() const;
   std::vector<Step *> &
     next_steps() { return _next_steps; }
