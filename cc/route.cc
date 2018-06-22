@@ -26,11 +26,6 @@ Route::Route(Task &task, const string &name, const Cost &cost_obj)
   : _this_task(task), _name(name), _cost(&cost_obj),
   _net_value(Consts::DOUBLE_NONE)
 {
-  // create a special cost object if needed
-  if (!_this_task.is_virtual() && !Consts::is_none(_this_task.line_expense()))
-    _cost = new Cost(_cost->distance(),
-                     _this_task.line_expense(),
-                     _cost->duration());
   _expected_end_time = _this_task.expected_start_time() 
     + _this_task.no_run_time() + _cost->duration();
 #ifdef DEBUG
@@ -42,9 +37,6 @@ Route::Route(Task &task, const string &name, const Cost &cost_obj)
 
 Route::~Route()
 {
-  if (!_this_task.is_virtual() && !Consts::is_none(_this_task.line_expense()))
-    delete _cost;  // delete special cost object with a special line expense
-  _cost = 0;
   for (std::vector<Step *>::iterator it = _next_steps.begin();
        it != _next_steps.end(); ++it)
     delete *it;

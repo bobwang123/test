@@ -55,6 +55,8 @@ public:
     wait_time() const { return 0.0; }
   virtual const double
     line_expense() const { return Consts::DOUBLE_NONE; }
+  void
+    line_expense(double) {}
   const bool
     is_virtual() const { return _is_virtual; }
   void
@@ -104,6 +106,8 @@ public:
       receivable() const { return _receivable; }
     const double
       line_expense() const { return _line_expense; }
+    void
+      line_expense(double v) { _line_expense = v; }
     Route *
       max_net_value_route();
 };

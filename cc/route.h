@@ -38,7 +38,11 @@ public:
   const std::string &
     name() const { return _name; }
   const double
-    expense() const { return _cost->expense(); }
+    expense() const
+    {
+      const double line_expense = _this_task.line_expense();
+      return Consts::is_none(line_expense) ? _cost->expense() : line_expense;
+    }
   const double
     gross_margin() const;
   std::vector<Step *> &
