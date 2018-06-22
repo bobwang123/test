@@ -80,6 +80,7 @@ Step::to_treemap(const int level, const double cond_prob,
 {
   // TODO: add empty run info to the treemap
   return
-    _order_task.max_net_value_route()->to_treemap(level, cond_prob, cost_prob_mat);
+    _order_task.max_net_value_route()->to_treemap(
+      level, cond_prob, cost_prob_mat, _empty_run_route.gross_margin());
 }
 

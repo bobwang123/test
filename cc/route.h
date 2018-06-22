@@ -80,7 +80,8 @@ public:
     to_dict(const CostMatrix &cost_prob_mat) const;
   cJSON *
     to_treemap(const int level, const double cond_prob,
-               const CostMatrix &cost_prob_mat) const;
+               const CostMatrix &cost_prob_mat,
+               const double empty_run_cost = 0.0) const;
 };
 
 #endif /* __ROUTE_H__ */

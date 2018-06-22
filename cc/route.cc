@@ -189,15 +189,18 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
 
 cJSON *
 Route::to_treemap(const int level, const double cond_prob,
-                  const CostMatrix &cost_prob_mat) const
+                  const CostMatrix &cost_prob_mat,
+                  const double empty_run_cost) const
 {
   cJSON *route_treemap = cJSON_CreateObject();
+  assert(empty_run_cost <= 0.0);
+  const double step_net_value = net_value() + empty_run_cost;
   const double prob = _this_task.prob();
   enum {_NET_VALUE_EFF, _NET_VALUE, _PROB, _TIME_STAMP, _SIZE};
   const double value[_SIZE] = {
-      [_NET_VALUE_EFF] = cond_prob * prob * net_value(),
-      //[_NET_VALUE_EFF] = net_value(),
-      [_NET_VALUE] = net_value(),
+      // _NET_VALUE_EFF: contribution to this level
+      [_NET_VALUE_EFF] = cond_prob * prob * step_net_value,
+      [_NET_VALUE] = step_net_value,
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3)
   };
@@ -210,22 +213,38 @@ Route::to_treemap(const int level, const double cond_prob,
   //cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
   if (_next_steps.empty())
     return route_treemap;
+  if (level > 5)
+    return route_treemap;
   cJSON *children = cJSON_CreateArray();
   // Greedy strategy
   double p = 1.0;
   const double PROB_TH = -10e-2;
-  if (level > 3)
-    return route_treemap;
   // dump limited nodes
   size_t c = 0;
-  std::cout << "[!]Level = " << level << ", children step size = " << _next_steps.size() << std::endl;
+#ifdef DEBUG
+  if (level == 5)
+  {
+    std::cout << "[!]Level = " << level << ", children step size = " << _next_steps.size() << std::endl;
+    std::cout << "[*] ";
+    c = 0;
+    for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
+         it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
+    {
+      const Step *ns = *it;
+      if (!(c % 5))
+      std::cout << ns->net_value() << " ";
+    }
+    std::cout << std::endl;
+    getchar();
+  }
+#endif
+  c = 0;
   for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
        it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
   {
-    if (c % 5)
-      continue;
     const Step *ns = *it;
-    cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
+    if (!(c % 5))
+      cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
     p *= 1.0 - ns->prob();
   }
   cJSON_AddItemToObjectCS(route_treemap, "children", children);
