@@ -25,7 +25,7 @@ namespace
   // convert milliseconds to hours since 1970-1-1 00:00:00
   double _ms2hours(const double ms)
   {
-    assert(ms > 0.0);
+    assert(ms >= 0.0);
     return ms / 3600e3;
   }
 }
@@ -108,7 +108,7 @@ Scheduler::_init_vehicles_from_json(const char *filename)
     const CostMatrix::CityIdxType avl_loc = _cost_prob.city_idx(avl_city_name);
     const double avl_time_stamp_ms =
       cJSON_GetObjectItem(json_vehicle, "earliestAvailableTime")->valuedouble;
-    assert(avl_time_stamp_ms > 0.0);
+    assert(avl_time_stamp_ms >= 0.0);
     const double avl_time = _ms2hours(avl_time_stamp_ms);
     _sorted_vehicles.push_back(new Vehicle(name, avl_loc, avl_time));
   }
