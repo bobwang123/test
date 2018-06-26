@@ -49,6 +49,8 @@ public:
     gross_margin() const;
   std::vector<Step *> &
     next_steps() { return _next_steps; }
+  const std::vector<Step *> &
+    next_steps() const { return _next_steps; }
   const bool
     connect(OrderTask &task,
             const CostMatrix &cost_prob_mat,

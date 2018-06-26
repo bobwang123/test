@@ -51,14 +51,10 @@ public:
     no_run_time() const { return 0.0; }
   virtual const double
     receivable() const { return 0.0; }
-  virtual void
-    receivable(double) {}
   virtual const double
     wait_time() const { return 0.0; }
   virtual const double
     line_expense() const { return Consts::DOUBLE_NONE; }
-  void
-    line_expense(double) {}
   const bool
     is_virtual() const { return _is_virtual; }
   void
@@ -106,14 +102,12 @@ public:
       no_run_time() const { return _load_time + _unload_time; }
     const double
       receivable() const { return _receivable; }
-    void
-      receivable(double v) { _receivable = v; }
     const double
       line_expense() const { return _line_expense; }
-    void
-      line_expense(double v) { _line_expense = v; }
     Route *
       max_net_value_route();
+    const Route *
+      max_net_value_route() const { return _max_net_value_route; }
     void
       reset_max_net_value_route() { _max_net_value_route = 0; }
 };

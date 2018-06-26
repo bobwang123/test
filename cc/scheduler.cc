@@ -329,6 +329,21 @@ Scheduler::_analyze_orders()
   _build_order_dag();
 }
 
+namespace
+{
+  inline bool _isTerminalRoute(const Route *route)
+  {
+    assert(route);
+    return route->next_steps().empty();
+  }
+
+  inline bool _isTerminalTask(const OrderTask *task)
+  {
+    assert(task);
+    return _isTerminalRoute(task->max_net_value_route());
+  }
+}
+
 void
 Scheduler::_update_terminal_net_value()
 {
@@ -351,15 +366,17 @@ Scheduler::_update_terminal_net_value()
         {
           OrderTask *task = *it;
           assert(task);
-          Route *route = task->max_net_value_route();
-          assert(route);
-          const bool isTerminalTask = route->next_steps().empty();
-          if (!isTerminalTask)
+          if (!_isTerminalTask(task))
             continue;
+#if 0
           const double TIME_WINDOW_IN_HOUR = 240.0;
-          task->receivable(route_1st->net_value() / TIME_WINDOW_IN_HOUR
-                           * route->duration());
-          task->line_expense(0.0);
+          const double new_net_value =
+            route_1st->net_value() / TIME_WINDOW_IN_HOUR
+            * task->max_net_value_route()->duration();
+#else
+          const double new_net_value = route_1st->net_value();
+#endif
+          task->max_net_value_route()->net_value(new_net_value);
         }
       }
 }
@@ -374,7 +391,8 @@ Scheduler::_reset_order_net_value_stuff()
     vector<Route *> &routes = _sorted_orders[i]->routes();
     for (vector<Route *>::iterator it = routes.begin();
          it != routes.end(); ++it)
-      (*it)->reset_net_value_stuff();
+      if (!_isTerminalRoute(*it))
+        (*it)->reset_net_value_stuff();
   }
 }
 
