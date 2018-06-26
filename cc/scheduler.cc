@@ -387,23 +387,20 @@ Scheduler::run()
   double t1 = get_wall_time();
   for (vector<Vehicle *>::iterator it = _sorted_vehicles.begin();
        it != _sorted_vehicles.end(); ++it)
-  {
-    double t2 = get_wall_time();
-    int i = 0;
-    for (;;)
+    for (int i = 0;;)
     {
       Vehicle *vehicle = *it;
       vehicle->compute_net_value();
-      print_wall_time_diff(t2, "Compute net values of a vehicle");
-      t2 = get_wall_time();
       if (++i >= NITER)
         break;
+      else
+        cout << "\r[#] Iteration " << i << "          " << flush;
       // prepare for next iteration
       _update_terminal_net_value();
       _reset_order_net_value_stuff();
       vehicle->reset_net_value_stuff();
     }
-  }
+  cout << endl;
   print_wall_time_diff(t1, "Compute net values of vehicles");
 #ifdef DEBUG
   Route::print_num_objs();
