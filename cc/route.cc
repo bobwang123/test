@@ -194,19 +194,25 @@ Route::to_treemap(const int level, const double cond_prob,
                   const CostMatrix &cost_prob_mat,
                   const double empty_run_cost) const
 {
-  cJSON *route_treemap = cJSON_CreateObject();
   assert(empty_run_cost <= 0.0);
   const double step_net_value = net_value() + empty_run_cost;
   const double prob = _this_task.prob();
-  enum {_NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _SIZE};
+  const double contribution = cond_prob * prob * step_net_value;
+  if (-1 < contribution && contribution < 1)
+    return 0;
+  enum {_NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _EMPTY_RUN_COST,
+      _GROSS_MARGIN, _SIZE};
   const double value[_SIZE] = {
-      // _NET_VALUE: decision making factor
+      // decision making factor
       [_NET_VALUE] = step_net_value,
       // _NET_VALUE_EFF: contribution to this level
-      [_NET_VALUE_EFF] = cond_prob * prob * step_net_value,
+      [_NET_VALUE_EFF] = contribution,
       [_PROB] = prob,
-      [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3)
+      [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3),
+      [_EMPTY_RUN_COST] = empty_run_cost,
+      [_GROSS_MARGIN] = gross_margin()
   };
+  cJSON *route_treemap = cJSON_CreateObject();
   cJSON_AddItemToObjectCS(route_treemap, "value",
                           cJSON_CreateDoubleArray(value, _SIZE));
   string name = cost_prob_mat.city_name(_this_task.loc_from())
@@ -215,8 +221,6 @@ Route::to_treemap(const int level, const double cond_prob,
                           cJSON_CreateString(name.c_str()));
   //cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
   if (_next_steps.empty())
-    return route_treemap;
-  if (level > 5)
     return route_treemap;
   cJSON *children = cJSON_CreateArray();
   // Greedy strategy
@@ -246,8 +250,7 @@ Route::to_treemap(const int level, const double cond_prob,
        it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
   {
     const Step *ns = *it;
-    if (!(c % 5))
-      cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
+    cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
     p *= 1.0 - ns->prob();
   }
   cJSON_AddItemToObjectCS(route_treemap, "children", children);
