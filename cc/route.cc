@@ -126,6 +126,8 @@ void Route::update_net_value()
        it != _next_steps.end(); ++it)
   {
     const Step *ps = *it;
+    if (ps->net_value() <= 0.0)
+      break;  // skip all non-positive net value solutions
     const double p = ps->prob();
     sub_net_value = p * ps->net_value() + (1 - p) * sub_net_value;
   }
