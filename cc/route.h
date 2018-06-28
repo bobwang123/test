@@ -30,10 +30,16 @@ public:
   ~Route();
   static bool
     cmp_net_value(const Route *ra, const Route *rb)
-    { return ra->net_value() < rb->net_value()
-      || ((ra->net_value() == rb->net_value())
+    {
+      // Avoid too sensitive sorting:
+      // fixed cent vs. fixed cent, instead of yuan vs. yuan
+      const long va = static_cast<long>(ra->net_value() * 100);
+      const long vb = static_cast<long>(rb->net_value() * 100);
+      return va < vb
+      || ((va == vb)  // when fixed value equals
           && (ra->_this_task.expected_start_time()
-              > rb->_this_task.expected_start_time())); }
+              > rb->_this_task.expected_start_time()));
+    }
 public:
   const std::string &
     name() const { return _name; }

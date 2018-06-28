@@ -20,10 +20,16 @@ public:
   ~Step();
   static bool
     cmp_net_value(const Step *sa, const Step *sb)
-    { return sa->net_value() < sb->net_value()
-      || ((sa->net_value() == sb->net_value())
+    {
+      // Avoid too sensitive sorting:
+      // fixed cent vs. fixed cent, instead of yuan vs. yuan
+      const long va = static_cast<long>(sa->net_value() * 100);
+      const long vb = static_cast<long>(sb->net_value() * 100);
+      return va < vb
+      || ((va == vb)  // when fixed value equals
           && (sa->_order_task.expected_start_time()
-              > sb->_order_task.expected_start_time())); }
+              > sb->_order_task.expected_start_time()));
+    }
 public:
   const double
     prob() const { return _order_task.prob(); }
