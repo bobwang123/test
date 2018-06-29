@@ -194,7 +194,7 @@ Scheduler::_init_order_tasks_from_json(const char *filename)
   print_wall_time_diff(t1, "Create orders with JSON objects");
   _orders = orders;
   _ignore_unreachable_orders_and_sort(num_orders);
-  _make_categorized_orders();
+  _make_categorized_virtual_orders();
   return 0;
 }
 
@@ -256,7 +256,7 @@ Scheduler::_ignore_unreachable_orders_and_sort(const size_t num_orders)
 }
 
 void
-Scheduler::_make_categorized_orders()
+Scheduler::_make_categorized_virtual_orders()
 {
   double t1 = get_wall_time();
   // allocate memory for categorized orders matrix
@@ -274,11 +274,13 @@ Scheduler::_make_categorized_orders()
   for (size_t i = 0; i < _num_sorted_orders; ++i)
   {
     OrderTask *pot = _sorted_orders[i];
+    if (pot && !pot->is_virtual())
+      continue;  // do not categorize real orders
     const size_t fri = pot->loc_from(), toi = pot->loc_to();
     const size_t tki = CostMatrix::hour_tick(pot->expected_start_time());
     _categorized_orders[fri][toi][tki].push_back(pot);
   }
-  print_wall_time_diff(t1, "Create categorized orders matrix");
+  print_wall_time_diff(t1, "Create categorized virtual orders matrix");
 }
 
 void

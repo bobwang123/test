@@ -37,7 +37,7 @@ private:
   void
     _ignore_unreachable_orders_and_sort(const std::size_t num_orders);
   void
-    _make_categorized_orders();
+    _make_categorized_virtual_orders();
   void
     _build_order_cost();
   void
