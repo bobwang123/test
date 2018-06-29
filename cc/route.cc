@@ -205,6 +205,8 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
   return route_dict;
 }
 
+extern int NITER;
+
 cJSON *
 Route::to_treemap(const int level /*unused*/, const double cond_prob,
                   const CostMatrix &cost_prob_mat,
@@ -216,13 +218,14 @@ Route::to_treemap(const int level /*unused*/, const double cond_prob,
   const double contribution = cond_prob * prob * step_net_value;
   if (-1 < contribution && contribution < 1)
     return 0;
-  enum {_NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _EMPTY_RUN_COST,
+  enum {_AREA, _NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _EMPTY_RUN_COST,
       _GROSS_MARGIN, _SIZE};
   const double value[_SIZE] = {
       // decision making factor
-      [_NET_VALUE] = step_net_value,
+      [_AREA] = (step_net_value + contribution) / NITER,
+      [_NET_VALUE] = step_net_value / NITER,
       // _NET_VALUE_EFF: contribution to this level's net value
-      [_NET_VALUE_EFF] = contribution,
+      [_NET_VALUE_EFF] = contribution / NITER,
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3),
       [_EMPTY_RUN_COST] = empty_run_cost,
