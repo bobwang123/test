@@ -107,8 +107,11 @@ Route::connect(OrderTask &task,
 namespace
 {
   inline bool
-    has_positive_net_value(const Step *s)
+    is_positive(const Step *s)
     { return s && (s->net_value() > 0.0); }
+  inline bool
+    is_non_positive(const Step *s)
+    { return !is_positive(s); }
 }
 
 void Route::update_net_value()
@@ -133,10 +136,10 @@ void Route::update_net_value()
   /* Greedy strategy leads to the maximum math expectation
    * of all sub-Step net_values. Must evaluate positive sub-Step net_values
    * from small to large */
-  std::vector<Step *>::const_iterator pos_net_value_begin =
-    find_if(_next_steps.begin(), _next_steps.end(), has_positive_net_value);
+  std::vector<Step *>::const_iterator pos_begin =
+    find_if(_next_steps.begin(), _next_steps.end(), is_positive);
   double sub_net_value = 0.0;
-  for (std::vector<Step *>::const_iterator cit = pos_net_value_begin;
+  for (std::vector<Step *>::const_iterator cit = pos_begin;
        cit != _next_steps.end(); ++cit)
   {
     const Step *ps = *cit;
@@ -203,7 +206,7 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
 }
 
 cJSON *
-Route::to_treemap(const int level, const double cond_prob,
+Route::to_treemap(const int level /*unused*/, const double cond_prob,
                   const CostMatrix &cost_prob_mat,
                   const double empty_run_cost) const
 {
@@ -218,7 +221,7 @@ Route::to_treemap(const int level, const double cond_prob,
   const double value[_SIZE] = {
       // decision making factor
       [_NET_VALUE] = step_net_value,
-      // _NET_VALUE_EFF: contribution to this level
+      // _NET_VALUE_EFF: contribution to this level's net value
       [_NET_VALUE_EFF] = contribution,
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3),
@@ -232,35 +235,17 @@ Route::to_treemap(const int level, const double cond_prob,
     + "->" + cost_prob_mat.city_name(_this_task.loc_to());
   cJSON_AddItemToObjectCS(route_treemap, "name",
                           cJSON_CreateString(name.c_str()));
-  //cJSON_AddItemToObjectCS(route_treemap, "id", cJSON_CreateNull());
   if (_next_steps.empty())
     return route_treemap;
   cJSON *children = cJSON_CreateArray();
   // Greedy strategy
   double p = 1.0;
-  const double PROB_TH = -10e-2;
-  // dump limited nodes
-  size_t c = 0;
-#ifdef DEBUG
-  if (level == 5)
-  {
-    std::cout << "[!]Level = " << level << ", children step size = " << _next_steps.size() << std::endl;
-    std::cout << "[*] ";
-    c = 0;
-    for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
-         it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
-    {
-      const Step *ns = *it;
-      if (!(c % 5))
-      std::cout << ns->net_value() << " ";
-    }
-    std::cout << std::endl;
-    //getchar();
-  }
-#endif
-  c = 0;
+  // dump treemap in accord with net value evalutation:
+  // skip all non-positive net value
+  std::vector<Step *>::const_reverse_iterator pos_rend =
+    find_if(_next_steps.rbegin(), _next_steps.rend(), is_non_positive);
   for (std::vector<Step *>::const_reverse_iterator it = _next_steps.rbegin();
-       it != _next_steps.rend() && p > PROB_TH; ++it, ++c)
+       it != pos_rend; ++it)
   {
     const Step *ns = *it;
     cJSON_AddItemToArray(children, ns->to_treemap(level + 1, p, cost_prob_mat));
