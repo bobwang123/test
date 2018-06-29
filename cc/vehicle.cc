@@ -5,6 +5,7 @@
 #include "plan.h"
 #include "step.h"
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -106,11 +107,25 @@ Vehicle::plans_to_dict(const CostMatrix &cost_prob_mat) const
   return vehicle_plans;
 }
 
+namespace
+{
+  inline bool _is_real_step(const Step *s)
+  {
+    return s && !s->is_virtual();
+  }
+}
+
 cJSON *
 Vehicle::to_treemap(const CostMatrix &cost_prob_mat) const
 {
-  const Step *step1 = _start_route->next_steps().back();
+  vector<Step *> next_steps = _start_route->next_steps();
+  // const Step *step1 = _start_route->next_steps().back();
+  vector<Step *>::iterator step1_iter =
+    find_if(next_steps.begin(), next_steps.end(), _is_real_step);
+  if (next_steps.end() == step1_iter)  // no real step found
+    return 0;
   cJSON *treemap = cJSON_CreateArray();
-  cJSON_AddItemToArray(treemap, step1->to_treemap(1, 1.0, cost_prob_mat));
+  cJSON_AddItemToArray(treemap,
+                       (*step1_iter)->to_treemap(1, 1.0, cost_prob_mat));
   return treemap;
 }
