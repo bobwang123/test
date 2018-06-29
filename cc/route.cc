@@ -104,8 +104,19 @@ Route::connect(OrderTask &task,
   return connected;
 }
 
+namespace
+{
+  inline bool
+    has_positive_net_value(const Step *s)
+    { return s && (s->net_value() > 0.0); }
+}
+
 void Route::update_net_value()
 {
+#ifdef DEBUG
+  if (!_this_task.is_virtual())
+    std::cout << "[#]Real Order is updating!" << std::endl;
+#endif
   if (!Consts::is_none(_net_value))
     return;
   _net_value = gross_margin();
@@ -120,17 +131,19 @@ void Route::update_net_value()
   }
   stable_sort(_next_steps.begin(), _next_steps.end(), Step::cmp_net_value);
   /* Greedy strategy leads to the maximum math expectation
-   * of all sub-Step net_values. */
+   * of all sub-Step net_values. Must evaluate positive sub-Step net_values
+   * from small to large */
+  std::vector<Step *>::const_iterator pos_net_value_begin =
+    find_if(_next_steps.begin(), _next_steps.end(), has_positive_net_value);
   double sub_net_value = 0.0;
-  for (std::vector<Step *>::iterator it = _next_steps.begin();
-       it != _next_steps.end(); ++it)
+  for (std::vector<Step *>::const_iterator cit = pos_net_value_begin;
+       cit != _next_steps.end(); ++cit)
   {
-    const Step *ps = *it;
-    if (ps->net_value() <= 0.0)
-      break;  // skip all non-positive net value solutions
+    const Step *ps = *cit;
     const double p = ps->prob();
     sub_net_value = p * ps->net_value() + (1 - p) * sub_net_value;
   }
+  assert(sub_net_value >= 0.0);
   _net_value += sub_net_value;
 }
 
