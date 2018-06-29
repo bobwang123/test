@@ -255,7 +255,7 @@ Route::to_treemap(const int level, const double cond_prob,
       std::cout << ns->net_value() << " ";
     }
     std::cout << std::endl;
-    getchar();
+    //getchar();
   }
 #endif
   c = 0;
