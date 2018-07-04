@@ -61,6 +61,7 @@ namespace
 }
 
 int NITER = 1;
+int CITER = 1;
 
 /*
  * **Usage**

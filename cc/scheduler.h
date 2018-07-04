@@ -17,8 +17,8 @@ class Scheduler
   OrderTask **_sorted_orders;  // filtered orders sorted by expected_start_time
   std::size_t _num_sorted_orders;
   const CostMatrix &_cost_prob;
-  // categorized orders: [from_loc][to_loc][time_tick] => vector<OrderTask *>
-  std::vector<OrderTask *> ***_categorized_orders;
+  // categorized virtual orders: [from_loc][to_loc][time_tick] => vector<OrderTask *>
+  std::vector<OrderTask *> ***_categorized_virtual_orders;
   static const double _PROB_TH;  // probability threshold to filter orders
   static const double _DEFAULT_LOAD_TIME;  // hours
   static const double _DEFAULT_UNLOAD_TIME;  // hours

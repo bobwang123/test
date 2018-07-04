@@ -50,7 +50,7 @@ Scheduler::Scheduler(const char *vehicle_file,
                      const char *order_file,
                      const CostMatrix &cst_prb)
   : _mb(0), _num_sorted_vehicles(0), _num_sorted_orders(0),
-  _cost_prob(cst_prb), _categorized_orders(0)
+  _cost_prob(cst_prb), _categorized_virtual_orders(0)
 {
   if (!_init_vehicles_from_json(vehicle_file))
     _init_order_tasks_from_json(order_file);
@@ -63,11 +63,11 @@ Scheduler::~Scheduler()
   for (int fri = 0; fri < ncities; ++fri)
   {
     for (int toi = 0; toi < ncities; ++toi)
-      delete []_categorized_orders[fri][toi];
-    delete []_categorized_orders[fri];
+      delete []_categorized_virtual_orders[fri][toi];
+    delete []_categorized_virtual_orders[fri];
   }
-  delete []_categorized_orders;
-  _categorized_orders = 0;
+  delete []_categorized_virtual_orders;
+  _categorized_virtual_orders = 0;
   print_wall_time_diff(t1, "Destruct categorizied orders matrix");
   t1 = get_wall_time();
   // #pragma omp parallel for
@@ -262,12 +262,12 @@ Scheduler::_make_categorized_virtual_orders()
   // allocate memory for categorized orders matrix
   const size_t ncities = _cost_prob.num_cities();
   const size_t nticks = CostMatrix::num_hour_ticks();
-  _categorized_orders = new std::vector<OrderTask *> **[ncities];
+  _categorized_virtual_orders = new std::vector<OrderTask *> **[ncities];
   for (size_t fri = 0; fri < ncities; ++fri)
   {
-    _categorized_orders[fri] = new std::vector<OrderTask *> *[ncities];
+    _categorized_virtual_orders[fri] = new std::vector<OrderTask *> *[ncities];
     for (size_t toi = 0; toi < ncities; ++toi)
-      _categorized_orders[fri][toi] = new std::vector<OrderTask *> [nticks];
+      _categorized_virtual_orders[fri][toi] = new std::vector<OrderTask *> [nticks];
   }
   // categorize orders
   assert(_sorted_orders || !"_sorted_orders must be made before!");
@@ -278,7 +278,7 @@ Scheduler::_make_categorized_virtual_orders()
       continue;  // do not categorize real orders
     const size_t fri = pot->loc_from(), toi = pot->loc_to();
     const size_t tki = CostMatrix::hour_tick(pot->expected_start_time());
-    _categorized_orders[fri][toi][tki].push_back(pot);
+    _categorized_virtual_orders[fri][toi][tki].push_back(pot);
   }
   print_wall_time_diff(t1, "Create categorized virtual orders matrix");
 }
@@ -346,6 +346,9 @@ namespace
   }
 }
 
+extern int NITER;
+extern int CITER;
+
 void
 Scheduler::_update_terminal_net_value()
 {
@@ -355,7 +358,7 @@ Scheduler::_update_terminal_net_value()
     for (size_t toi = 0; toi < ncities; ++toi)
       for (size_t tki = 0; tki < nticks; ++tki)
       {
-        vector<OrderTask *> &tasks = _categorized_orders[fri][toi][tki];
+        vector<OrderTask *> &tasks = _categorized_virtual_orders[fri][toi][tki];
         if (tasks.empty())
           continue;
         OrderTask *task_1st =
@@ -376,7 +379,9 @@ Scheduler::_update_terminal_net_value()
             route_1st->net_value() / TIME_WINDOW_IN_HOUR
             * task->max_net_value_route()->duration();
 #else
-          const double new_net_value = route_1st->net_value();
+          // const double damping = CITER / (CITER + 1.0);
+          const double damping = (1 == CITER) ? 1.0 : 1.0/2;
+          const double new_net_value = route_1st->net_value() * damping;
 #endif
           task->max_net_value_route()->net_value(new_net_value);
         }
@@ -398,8 +403,6 @@ Scheduler::_reset_order_net_value_stuff()
   }
 }
 
-extern int NITER;
-
 void
 Scheduler::run()
 {
@@ -419,6 +422,7 @@ Scheduler::run()
       _update_terminal_net_value();
       _reset_order_net_value_stuff();
       vehicle->reset_net_value_stuff();
+      ++CITER;
     }
   cout << endl;
   print_wall_time_diff(t1, "Compute net values of vehicles");

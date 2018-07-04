@@ -114,6 +114,9 @@ namespace
     { return !is_positive(s); }
 }
 
+extern int NITER;
+extern int CITER;
+
 void Route::update_net_value()
 {
 #ifdef DEBUG
@@ -144,8 +147,12 @@ void Route::update_net_value()
   {
     const Step *ps = *cit;
     const double p = ps->prob();
+    if (!_this_task.is_virtual())
+      ;// cout << "[l1] prob =" << p * 100 << "%, net_value/NITER = " << ps->net_value()/NITER << endl;
     sub_net_value = p * ps->net_value() + (1 - p) * sub_net_value;
   }
+  if (!_this_task.is_virtual())
+    ; //cout << "--------------------" << endl;
   assert(sub_net_value >= 0.0);
   _net_value += sub_net_value;
 }
@@ -205,8 +212,6 @@ Route::to_dict(const CostMatrix &cost_prob_mat) const
   return route_dict;
 }
 
-extern int NITER;
-
 cJSON *
 Route::to_treemap(const int level /*unused*/, const double cond_prob,
                   const CostMatrix &cost_prob_mat,
@@ -217,15 +222,16 @@ Route::to_treemap(const int level /*unused*/, const double cond_prob,
   const double prob = _this_task.prob();
   const double contribution = cond_prob * prob * step_net_value;
   if (-1 < contribution && contribution < 1)
+  //if (level > 2)
     return 0;
   enum {_AREA, _NET_VALUE, _NET_VALUE_EFF, _PROB, _TIME_STAMP, _EMPTY_RUN_COST,
       _GROSS_MARGIN, _SIZE};
   const double value[_SIZE] = {
       // decision making factor
-      [_AREA] = (step_net_value + contribution) / NITER,
-      [_NET_VALUE] = step_net_value / NITER,
+      [_AREA] = step_net_value + contribution,
+      [_NET_VALUE] = step_net_value,
       // _NET_VALUE_EFF: contribution to this level's net value
-      [_NET_VALUE_EFF] = contribution / NITER,
+      [_NET_VALUE_EFF] = contribution,
       [_PROB] = prob,
       [_TIME_STAMP] = round(_this_task.expected_start_time() * 3600e3),
       [_EMPTY_RUN_COST] = empty_run_cost,
